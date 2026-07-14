@@ -1,0 +1,12 @@
+name: UniQuests
+description: $description
+prefix: UniTrade
+version: '${version}'
+
+main: net.ody.uniQuests.UniQuests
+paperPluginLoader: net.ody.uniQuests.UniQuestsLoader
+api-version: '1.21.11'
+load: POSTWORLD
+
+authors: [ .ody ]
+website: https://github.com/ombre77/UniQuests
