@@ -7,11 +7,12 @@ To create a quest, you need to go in the "quests" folder, inside the plugin's fo
 - weekly
 - monthly
 - global
-  Each of those 3 options represent the time the quest will be keep before being disabled then deleted (disable/enable deleting in the plugin config). daily is 1 day, weekly 7, monthly 30 and global infinite.
+
+Each of those 3 options represent the time the quest will be keep before being disabled then deleted (disable/enable deleting in the plugin config). daily is 1 day, weekly 7, monthly 30 and global infinite.
 
 ## How
 
-to create a quest, you need to create a *quest file*. a quest file is a JSON file with this base structure:
+To create a quest, you need to create a *quest file*. a quest file is a JSON file with this base structure:
 ```json
 {
   "created":"dd/MM/yy"
@@ -55,7 +56,7 @@ Then, fill the value with another map containing  the quest parameter
 - `display_name` : the name of the quest on the item in the quest menu
 - `desc` : a quick description of the quest (showed in the lore of the item)
 - `requirements` : the requirements to complete the quest
-    - **Multiple type of requirements
+    - **Multiple type of requirements**
         - `have` : the player must have in its inventory a certain quantity of an item
         - `killed` : the player must have killed a certain amount of a mob
         - `placed` : the player must have placed a certain amount of a block
