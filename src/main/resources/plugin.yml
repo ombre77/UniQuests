@@ -1,6 +1,6 @@
 name: UniQuests
 description: $description
-prefix: UniTrade
+prefix: UniQuests
 version: '${version}'
 
 main: net.ody.uniQuests.UniQuests
@@ -10,3 +10,9 @@ load: POSTWORLD
 
 authors: [ .ody ]
 website: https://github.com/ombre77/UniQuests
+
+commands:
+  quests:
+    description: Opens the quests menu
+    usage: /quests
+    aliases: [quest,q]

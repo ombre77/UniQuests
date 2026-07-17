@@ -57,9 +57,10 @@ Then, fill the value with another map containing  the quest parameter
 - `desc` : a quick description of the quest (showed in the lore of the item)
 - `requirements` : the requirements to complete the quest
     - **Multiple type of requirements**
-        - `have` : the player must have in its inventory a certain quantity of an item
-        - `killed` : the player must have killed a certain amount of a mob
-        - `placed` : the player must have placed a certain amount of a block
+        - `have` ("item","amount") : the player must have in its inventory a certain quantity of an item
+        - `killed` ("mob","amount") : the player must have killed a certain amount of a mob
+        - `placed` ("block","amount"): the player must have placed a certain amount of a block
+        - `quest` ("quest_id"): the player must have completed a certain quest
 - `price` : the cost of the quest
     - **Multiple type of price**
         - `item` : take this a mount of item of the player inventory
