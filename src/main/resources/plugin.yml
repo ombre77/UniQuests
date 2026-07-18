@@ -16,3 +16,8 @@ commands:
     description: Opens the quests menu
     usage: /quests
     aliases: [quest,q]
+
+  questreload:
+    description: Reloads all UniQuests related datas
+    usage: /questreload
+    permission: op

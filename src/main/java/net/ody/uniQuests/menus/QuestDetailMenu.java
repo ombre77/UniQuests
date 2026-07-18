@@ -4,10 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.ody.uniQuests.UniQuests;
 import net.ody.uniQuests.handlers.QuestHandler;
-import net.ody.uniQuests.modules.Price;
-import net.ody.uniQuests.modules.Quest;
-import net.ody.uniQuests.modules.Requirement;
-import net.ody.uniQuests.modules.RewardEntry;
+import net.ody.uniQuests.modules.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -15,8 +12,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static net.ody.uniQuests.utils.Item.createItem;
 
@@ -24,9 +20,14 @@ public class QuestDetailMenu {
 
     public static final Component MENU_TITLE= Component.text("Quest Details");
     private static final int MENU_SIZE = 9*3; //3 rows
+    public static final int START_QUEST_SLOT=22;
+
+    private static final Map<UUID, Quest> playerQuest = new HashMap<>();
 
     public static void open(Player player, UniQuests plugin, Quest quest) {
         Inventory inv = Bukkit.createInventory(null, MENU_SIZE, MENU_TITLE);
+        playerQuest.put(player.getUniqueId(), quest);
+        PlayerData data = plugin.getOrCreatePlayerData(player);
 
         ItemStack filler = ItemStack.of(Material.BLACK_STAINED_GLASS_PANE);
         ItemMeta fillerMeta=filler.getItemMeta();
@@ -65,7 +66,7 @@ public class QuestDetailMenu {
 
         List<Component> RequireLore=new ArrayList<>();
         for (Requirement requirement:quest.requirements){
-            String line=QuestHandler.buildRequirement(requirement,plugin);
+            String line=QuestHandler.buildRequirement(requirement,plugin,player);
             RequireLore.add(Component.text(line,NamedTextColor.GREEN));
         }
         RequireLore.add(Component.text("Requirements of the quest to validate it",NamedTextColor.DARK_GRAY));
@@ -109,6 +110,35 @@ public class QuestDetailMenu {
                 ));
         inv.setItem(23,moreInfo);
 
+        ItemStack startItem;
+        if (data.isCompleted(quest.id)) {
+            startItem = createItem(Material.GRAY_DYE,
+                    Component.text("Already Completed", NamedTextColor.GRAY),
+                    List.of(Component.text("You have already completed this quest, gg!", NamedTextColor.DARK_GRAY)));
+        } else {
+            ActiveQuest activeQuest = data.getActive(quest.id);
+            if (activeQuest != null) {
+                startItem = createItem(Material.RED_DYE,
+                        Component.text("Abandon Quest", NamedTextColor.RED),
+                        List.of(Component.text("You have already started this quest", NamedTextColor.DARK_GRAY),
+                                Component.text("Click to abandon it", NamedTextColor.DARK_GRAY),
+                                Component.text("Progress will be reset!", NamedTextColor.DARK_RED)));
+            } else {
+                startItem = createItem(Material.LIME_DYE,
+                        Component.text("Start Quest", NamedTextColor.GREEN),
+                        List.of(Component.text("Click to start tracking this quest", NamedTextColor.DARK_GRAY)));
+            }
+        }
+        inv.setItem(START_QUEST_SLOT, startItem);
+
         player.openInventory(inv);
+    }
+
+    public static Quest getQuest(Player player) {
+        return playerQuest.get(player.getUniqueId());
+    }
+
+    public static void clearState(Player player) {
+        playerQuest.remove(player.getUniqueId());
     }
 }

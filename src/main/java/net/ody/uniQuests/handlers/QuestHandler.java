@@ -4,25 +4,40 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.ody.uniQuests.UniQuests;
-import net.ody.uniQuests.modules.Price;
-import net.ody.uniQuests.modules.Quest;
-import net.ody.uniQuests.modules.Requirement;
-import net.ody.uniQuests.modules.RewardEntry;
+import net.ody.uniQuests.modules.*;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 
 public class QuestHandler {
-    public static ItemStack createQuestItem(Quest quest,UniQuests plugin) {
-        ItemStack questItem = new ItemStack(Material.OAK_HANGING_SIGN);
+    public static ItemStack createQuestItem(Quest quest, UniQuests plugin, Player player) {
+        PlayerData playerData=plugin.getOrCreatePlayerData(player);
+        boolean inCompletion=playerData.getActive(quest.id)!=null;
+        boolean isCompleted=playerData.isCompleted(quest.id);
+
+        Material material = isCompleted ? Material.GRAY_DYE : Material.OAK_HANGING_SIGN;
+        ItemStack questItem = new ItemStack(material);
         ItemMeta questMeta = questItem.getItemMeta();
 
-        Component displayName = Component.text(quest.display_name,NamedTextColor.AQUA).decoration(TextDecoration.ITALIC,false);
+        if (inCompletion){
+            questMeta.setEnchantmentGlintOverride(true);
+        }
+
+        String name;
+        if (isCompleted){
+            name="[COMPLETED]"+quest.display_name;
+        } else{
+            name= quest.display_name;
+        }
+
+        Component displayName = Component.text(name,NamedTextColor.AQUA).decoration(TextDecoration.ITALIC,false);
         questMeta.displayName(displayName);
 
         List<Component> lore = new ArrayList<>();
@@ -30,19 +45,20 @@ public class QuestHandler {
 
         lore.add(Component.text("Requirements:",NamedTextColor.GREEN).decoration(TextDecoration.ITALIC,false));
         for (Requirement requirement : quest.requirements) {
-            String line = buildRequirement(requirement,plugin);
+            String line = buildRequirement(requirement,plugin,player);
             lore.add(Component.text(line).decoration(TextDecoration.ITALIC,false));
         }
-
         questMeta.lore(lore);
 
         questItem.setItemMeta(questMeta);
         return questItem;
     }
 
-    public static String buildRequirement(Requirement requirement, UniQuests plugin) {
+    public static String buildRequirement(Requirement requirement, UniQuests plugin,Player player) {
         String verb;
         String subject;
+        PlayerData data=plugin.getOrCreatePlayerData(player);
+        boolean inCompletion=data.getActive(requirement.quest_id)!=null;
 
         switch (requirement.type) {
             case "have" -> {
@@ -69,7 +85,40 @@ public class QuestHandler {
 
         String subjectDisplayName = prettify(subject);
 
-        return " - " + verb + " " + requirement.amount + " " + pluralize(subjectDisplayName, requirement.amount, requirement.type);
+        String strAmount;
+        if (requirement.type.equals("have")){
+            int currentAmount = countItems(player, requirement.item);
+            strAmount = currentAmount + "/" + requirement.amount;
+        }
+        else if (inCompletion){
+            ActiveQuest activeQuest =data.getActive(requirement.quest_id);
+            Quest quest=plugin.quests.get(activeQuest.quest_id);
+            String requirementId= String.valueOf(quest.requirements.indexOf(requirement));
+            int currentProgress=activeQuest.progress.get(requirementId);
+            strAmount=currentProgress+"/"+requirement.amount;
+        } else{
+            strAmount=""+requirement.amount;
+        }
+
+        return " - " + verb + " " + strAmount + " " + pluralize(subjectDisplayName, requirement.amount, requirement.type);
+    }
+
+    public static int countItems(Player player,String item){
+        ItemStack[] items = player.getInventory().getContents();
+        Material itemMat = Material.getMaterial(item.toUpperCase(Locale.ROOT));
+        if (itemMat == null) {
+            throw new IllegalArgumentException("Not a valid item: " + item);
+        }
+        int count = 0;
+        for (ItemStack itemStack : items) {
+            if (itemStack == null) {
+                continue;
+            }
+            if (itemStack.getType().equals(itemMat)) {
+                count += itemStack.getAmount();
+            }
+        }
+        return count;
     }
 
     public static String buildPrice(Price price){
@@ -88,7 +137,7 @@ public class QuestHandler {
     public static String buildReward(RewardEntry reward){
         String line;
         String rewardType = reward.type != null ? reward.type : "item";
-        String chance = reward.chance != null ? reward.chance + "%" : "100%";
+        String chance = reward.chance != null ? reward.chance + "%" : null;
 
         if (rewardType.equals("item")){
             line=" - "+reward.amount+" "+prettify(reward.item);
@@ -96,6 +145,10 @@ public class QuestHandler {
             line=" - "+reward.amount+" "+reward.exp+" of exp";
         } else {
             line=" - error.unrecognized_reward="+rewardType;
+        }
+
+        if (chance!=null) {
+            line += " chance:" + chance;
         }
 
         return line;
@@ -125,4 +178,5 @@ public class QuestHandler {
         }
         return amount == 1 ? word : word + "s";
     }
+
 }

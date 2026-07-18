@@ -15,39 +15,44 @@ Each of those 3 options represent the time the quest will be keep before being d
 To create a quest, you need to create a *quest file*. a quest file is a JSON file with this base structure:
 ```json
 {
-  "created":"dd/MM/yy"
+  "created":"dd/MM/yy",
+  "quests":{}
 }
 ```
 (replace the date in "created" field to the matching day)
 
-In order to add a quest, just add a field with the quest id (can be anything)
+In order to add a quest, just add a field inside quests with the quest id (can be anything)
+
 ```json
 {
-  "created":"dd/MM/yy",
-  "brand_new_quest":
+"created":"dd/MM/yy",
+"quests":{
+    "brand_new_quest":
 }
 ```
 
-Then, fill the value with another map containing  the quest parameter
+Then, fill the value with another map containing  the quest parameters
 ```json
 {
   "created":"dd/MM/yy",
-  "brand_new_quest":{
-    "display_name":"Get started",
-    "desc":"A quest to guide you on how tp get started",
-    "requirements":[
-      {"type":"have","item":"dirt","amount":32},
-      {"type":"killed","mob":"pig","amount":10},
-      {"type":"placed","block":"stone","amount":25}
-    ],
-    "price":[
-      {"item":"dirt","amount":32},
-      {"exp":"level","amount":1}
-    ],
-    "reward":[
-      {"type":"item","item":"emerald","amount":10},
-      {"type":"exp","exp":"points","amount":100}
-    ]
+  "quests":{
+    "brand_new_quest":{
+      "display_name":"Get started",
+      "desc":"A quest to guide you on how to get started",
+      "requirements":[
+        {"type":"have","item":"dirt","amount":32},
+        {"type":"killed","mob":"pig","amount":10},
+        {"type":"placed","block":"stone","amount":25}
+      ],
+      "price":[
+        {"item":"dirt","amount":32},
+        {"exp":"level","amount":1}
+      ],
+      "reward":[
+        {"type":"item","item":"emerald","amount":10},
+        {"type":"exp","exp":"points","amount":100}
+      ]
+    }
   }
 }
 ```
@@ -77,6 +82,5 @@ Then, fill the value with another map containing  the quest parameter
     - **Reward Tables**
         - Hi king! I know you will be reading this, so dw, I am currently adding a reward table system so you can set predefined items like you wanted. Also, for the event coin, just put "coin" for the `type` of the reward and the code will understand. You can also adjust the `amount` and the `chance`
 
-*Note*: you can create multiple quests in a same file, but they will share the **same** creation and so deletion date.
-
+Note: you can create multiple quests in a same file, but they will share the same creation and so deletion date. All quests in a file must now be nested under the `quests` key. `created` and `quests` are the only two top-level fields.
 ### If there is any more questions, dm me!

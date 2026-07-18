@@ -79,7 +79,7 @@ public class SeeQuestsMenu {
             }
         }
 
-        fillQuests(inv, quests, page,plugin);
+        fillQuests(inv, quests, page,plugin,player);
         fillNavigation(inv, quests, page);
 
         player.openInventory(inv);
@@ -96,7 +96,7 @@ public class SeeQuestsMenu {
         return filtered;
     }
 
-    private static void fillQuests(Inventory inv, List<Quest> quests, int page,UniQuests plugin) {
+    private static void fillQuests(Inventory inv, List<Quest> quests, int page,UniQuests plugin,Player player) {
         int totalPages = getTotalPages(quests);
         page = Math.clamp(page, 0, totalPages - 1);
 
@@ -106,7 +106,7 @@ public class SeeQuestsMenu {
         int slot = QUESTS_START_SLOT;
         for (int i = fromIndex; i < toIndex; i++) {
             Quest quest = quests.get(i);
-            inv.setItem(slot, QuestHandler.createQuestItem(quest,plugin));
+            inv.setItem(slot, QuestHandler.createQuestItem(quest,plugin,player));
             slot++;
         }
     }

@@ -30,7 +30,7 @@ public class QuestLoader {
 
     public Map<String,Quest> loadAllQuests(){
         Map<String, Quest> allQuests = new LinkedHashMap<>();
-        Type mapType = new TypeToken<Map<String, Quest>>() {}.getType();
+        Type fileType = new TypeToken<QuestFile>() {}.getType();
 
         Map<String, File> typeFolders = new LinkedHashMap<>();
         typeFolders.put("global", fileManager.getGlobalQuests());
@@ -50,17 +50,25 @@ public class QuestLoader {
             int loaded = 0;
             for (File file : files){
                 try (FileReader reader=new FileReader(file)){
-                    Map<String,Quest> fileQuests=gson.fromJson(reader,mapType);
-                    if (fileQuests !=null){
-                        for (Map.Entry<String,Quest> questEntry : fileQuests.entrySet()) {
+                    QuestFile questFile = gson.fromJson(reader, fileType);
+                    if (questFile != null && questFile.quests != null){
+                        if (questFile.created == null) {
+                            logger.warning("Quest file " + file.getName() + " is missing top-level \"created\"; skipping.");
+                            continue;
+                        }
+                        for (Map.Entry<String,Quest> questEntry : questFile.quests.entrySet()) {
                             Quest quest = questEntry.getValue();
                             quest.type = type;
+                            quest.created = questFile.created;
                             int expireDelay = getExpireDelay(quest);
-                            quest.expire= DateUtils.addDays(quest.created,expireDelay);
-                            quest.id=questEntry.getKey();
+                            quest.expire = DateUtils.addDays(quest.created, expireDelay);
+                            quest.id = questEntry.getKey();
+                            for (Requirement requirement : quest.requirements){
+                                requirement.quest_id = quest.id;
+                            }
                         }
-                        allQuests.putAll(fileQuests);
-                        loaded += fileQuests.size();
+                        allQuests.putAll(questFile.quests);
+                        loaded += questFile.quests.size();
                     }
                 } catch (IOException e) {
                     logger.warning("Failed to read quest file " + file.getName() + ": " + e.getMessage());
