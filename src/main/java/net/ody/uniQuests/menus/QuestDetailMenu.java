@@ -111,19 +111,32 @@ public class QuestDetailMenu {
         inv.setItem(23,moreInfo);
 
         ItemStack startItem;
+        //if completed
         if (data.isCompleted(quest.id)) {
             startItem = createItem(Material.GRAY_DYE,
                     Component.text("Already Completed", NamedTextColor.GRAY),
                     List.of(Component.text("You have already completed this quest, gg!", NamedTextColor.DARK_GRAY)));
-        } else {
+        }
+        else {
             ActiveQuest activeQuest = data.getActive(quest.id);
-            if (activeQuest != null) {
+            //can be validated
+            if (QuestHandler.questCompleted(quest,player,plugin)) {
+                startItem=createItem(Material.CLOCK,
+                        Component.text("Validate quest",NamedTextColor.GREEN),
+                        List.of(Component.text("Every requirements and price of the quest is completed,",NamedTextColor.DARK_GRAY),
+                                Component.text("Click to validate the quest",NamedTextColor.DARK_GRAY),
+                                Component.text("Be aware that the price will be taken from you!",NamedTextColor.DARK_GRAY)));
+            }
+            //if completing
+            else if (activeQuest != null) {
                 startItem = createItem(Material.RED_DYE,
                         Component.text("Abandon Quest", NamedTextColor.RED),
                         List.of(Component.text("You have already started this quest", NamedTextColor.DARK_GRAY),
                                 Component.text("Click to abandon it", NamedTextColor.DARK_GRAY),
                                 Component.text("Progress will be reset!", NamedTextColor.DARK_RED)));
-            } else {
+            }
+            //not started yet
+            else {
                 startItem = createItem(Material.LIME_DYE,
                         Component.text("Start Quest", NamedTextColor.GREEN),
                         List.of(Component.text("Click to start tracking this quest", NamedTextColor.DARK_GRAY)));

@@ -10,10 +10,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 public class QuestHandler {
@@ -32,7 +30,7 @@ public class QuestHandler {
 
         String name;
         if (isCompleted){
-            name="[COMPLETED]"+quest.display_name;
+            name="[COMPLETED] "+quest.display_name;
         } else{
             name= quest.display_name;
         }
@@ -86,7 +84,7 @@ public class QuestHandler {
         String subjectDisplayName = prettify(subject);
 
         String strAmount;
-        if (requirement.type.equals("have")){
+        if (requirement.type.equals("have") && inCompletion){
             int currentAmount = countItems(player, requirement.item);
             strAmount = currentAmount + "/" + requirement.amount;
         }
@@ -177,6 +175,109 @@ public class QuestHandler {
             return word;
         }
         return amount == 1 ? word : word + "s";
+    }
+
+    public static boolean requirementCompleted(Requirement requirement, Player player, UniQuests plugin){
+        if (requirement.type.equals("have")){
+            return countItems(player, requirement.item) >= requirement.amount;
+        }
+
+        PlayerData playerData = plugin.getOrCreatePlayerData(player);
+        ActiveQuest activeQuest = playerData.getActive(requirement.quest_id);
+        if (activeQuest == null) {
+            return false;
+        }
+
+        Quest quest = plugin.quests.get(activeQuest.quest_id);
+        String requirementId = String.valueOf(quest.requirements.indexOf(requirement));
+        Integer currentProgress = activeQuest.progress.get(requirementId);
+        return currentProgress != null && currentProgress >= requirement.amount;
+    }
+
+    public static boolean priceCompleted(Price price, Player player){
+        String priceType = price.type != null ? price.type : "item";
+        boolean completed;
+        switch (priceType) {
+            case "item" -> {
+                Material priceMat = Material.getMaterial(price.item.toUpperCase(Locale.ROOT));
+                if (priceMat == null){
+                    completed = false;
+                } else {
+                    ItemStack priceItem = new ItemStack(priceMat);
+                    completed = player.getInventory().containsAtLeast(priceItem,price.amount);
+                }
+            }
+            case "exp" -> {
+                switch (price.exp) {
+                    case "levels" -> completed = player.getExpToLevel() >= price.amount;
+                    case "points" -> completed = player.calculateTotalExperiencePoints() >= price.amount;
+                    default -> completed = false;
+                }
+            }
+            default -> completed = false;
+        }
+        return completed;
+    }
+
+    public static boolean questCompleted(Quest quest,Player player,UniQuests plugin){
+        PlayerData playerData=plugin.getOrCreatePlayerData(player);
+        ActiveQuest activeQuest=playerData.getActive(quest.id);
+        if (activeQuest==null) {
+            return false;
+        }
+
+        boolean completed=true;
+        //requirements check
+        for (Requirement requirement:quest.requirements){
+            if (!requirementCompleted(requirement,player,plugin)){
+                completed=false;
+            }
+        }
+        //cost check
+        for (Price price:quest.price){
+            if (!priceCompleted(price,player)){
+                completed=false;
+            }
+        }
+
+        return completed;
+    }
+
+    public static void giveRewards(Quest quest,Player player){
+        for (RewardEntry reward:quest.reward){
+            if (reward.chance!=null){
+                int randomInt = ThreadLocalRandom.current().nextInt(1, 101);
+                if (reward.chance<randomInt){
+                    continue;
+                }
+            }
+            switch (reward.type){
+                case "item" -> {
+                    Material rewardMat=Material.getMaterial(reward.item.toUpperCase(Locale.ROOT));
+                    if (rewardMat==null){
+                        player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.item!=Item.VALD_ITEM");
+                        continue;
+                    }
+                    ItemStack rewardItem = new ItemStack(rewardMat,reward.amount);
+                    player.give(rewardItem);
+                    player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
+                            .append(Component.text(reward.amount+" "+prettify(reward.item),NamedTextColor.GOLD)));
+                }
+                case "exp" -> {
+                    if (reward.exp.equals("levels")||reward.exp.equals("level")){
+                        player.giveExpLevels(reward.amount);
+                    } else if (reward.exp.equals("points")) {
+                        player.giveExp(reward.amount);
+                    } else {
+                        player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.exp!=Exp.VALD_TYPE");
+                        continue;
+                    }
+                    player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
+                            .append(Component.text(reward.amount+" "+reward.exp+" of exp",NamedTextColor.GOLD)));
+
+                }
+            }
+        }
     }
 
 }

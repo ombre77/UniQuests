@@ -56,6 +56,11 @@ public class QuestsMenu {
                 List.of(Component.text("Click to see the leaderboard!",NamedTextColor.GRAY)));
         inv.setItem(22,leaderboard);
 
+        ItemStack followedQuest=createItem(Material.WRITABLE_BOOK,
+                Component.text("Click to see your in-progress quests",NamedTextColor.AQUA),
+                List.of());
+        inv.setItem(0,followedQuest);
+
         player.openInventory(inv);
     }
 

@@ -1,5 +1,7 @@
 package net.ody.uniQuests.listeners;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.ody.uniQuests.UniQuests;
 import net.ody.uniQuests.menus.QuestsMenu;
 import net.ody.uniQuests.menus.SeeQuestsMenu;
@@ -36,16 +38,29 @@ public class QuestsMenuListener implements Listener {
                 SeeQuestsMenu.open(player,plugin,"global");
             }
             case 12 -> {
-                player.closeInventory();
-                SeeQuestsMenu.open(player,plugin,"daily");
+                player.sendMessage(Component.text("This functionality isn't ready yet!", NamedTextColor.RED));
+                return;
+                //player.closeInventory();
+                //SeeQuestsMenu.open(player,plugin,"daily");
             }
             case 14 -> {
-                player.closeInventory();
-                SeeQuestsMenu.open(player,plugin,"weekly");
+                player.sendMessage(Component.text("This functionality isn't ready yet!", NamedTextColor.RED));
+                return;
+                //player.closeInventory();
+                //SeeQuestsMenu.open(player,plugin,"weekly");
             }
             case 16 -> {
-                player.closeInventory();
-                SeeQuestsMenu.open(player,plugin,"monthly");
+                player.sendMessage(Component.text("This functionality isn't ready yet!", NamedTextColor.RED));
+                return;
+                //player.closeInventory();
+                //SeeQuestsMenu.open(player,plugin,"monthly");
+            }
+            case 22 -> {
+                player.sendMessage(Component.text("This functionality isn't ready yet!", NamedTextColor.RED));
+                return;
+            }
+            case 0->{
+                SeeQuestsMenu.open(player,plugin,"followed");
             }
         }
     }

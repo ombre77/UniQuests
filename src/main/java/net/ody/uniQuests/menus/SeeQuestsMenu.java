@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.ody.uniQuests.UniQuests;
 import net.ody.uniQuests.handlers.QuestHandler;
+import net.ody.uniQuests.modules.PlayerData;
 import net.ody.uniQuests.modules.Quest;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -47,7 +48,7 @@ public class SeeQuestsMenu {
             inv.setItem(i, filler);
         }
 
-        List<Quest> quests = getQuestsForType(plugin, type);
+        List<Quest> quests = getQuestsForType(plugin, type,player);
         switch (type) {
             case "global" -> {
                 ItemStack header=createItem(Material.KNOWLEDGE_BOOK,
@@ -77,6 +78,21 @@ public class SeeQuestsMenu {
                                 Component.text("Page "+(page+1)+"/"+getTotalPages(quests),NamedTextColor.GRAY)));
                 inv.setItem(4,header);
             }
+            case "followed" -> {
+                quests=new ArrayList<>();
+                PlayerData playerData=plugin.getOrCreatePlayerData(player);
+                for (Map.Entry<String,Quest> mapEntry:plugin.quests.entrySet()){
+                    Quest quest=mapEntry.getValue();
+                    if (playerData.getActive(quest.id)!=null){
+                        quests.add(quest);
+                    }
+                }
+
+                ItemStack header=createItem(Material.KNOWLEDGE_BOOK,
+                        Component.text("Your Ongoing Quests",NamedTextColor.AQUA),
+                        List.of(Component.text("Page "+(page+1)+"/"+getTotalPages(quests),NamedTextColor.GRAY)));
+                inv.setItem(4,header);
+            }
         }
 
         fillQuests(inv, quests, page,plugin,player);
@@ -86,11 +102,18 @@ public class SeeQuestsMenu {
         playerState.put(player.getUniqueId(), new MenuState(type, page));
     }
 
-    private static List<Quest> getQuestsForType(UniQuests plugin, String type) {
+    private static List<Quest> getQuestsForType(UniQuests plugin, String type,Player player) {
         List<Quest> filtered = new ArrayList<>();
         for (Quest quest : plugin.quests.values()) {
-            if (type.equals(quest.type)) {
-                filtered.add(quest);
+            if (!type.equals("followed")){
+                if (type.equals(quest.type)) {
+                    filtered.add(quest);
+                }}
+            else {
+                PlayerData playerData=plugin.getOrCreatePlayerData(player);
+                if (playerData.getActive(quest.id)!=null){
+                    filtered.add(quest);
+                }
             }
         }
         return filtered;
@@ -141,7 +164,7 @@ public class SeeQuestsMenu {
         if (state == null) {
             return null;
         }
-        List<Quest> quests = getQuestsForType(plugin, state.type());
+        List<Quest> quests = getQuestsForType(plugin, state.type(),player);
         int index = state.page() * QUESTS_PER_PAGE + (slot - QUESTS_START_SLOT);
         if (index < 0 || index >= quests.size()) {
             return null;

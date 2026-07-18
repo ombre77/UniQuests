@@ -1,5 +1,7 @@
 package net.ody.uniQuests.utils;
 
+import org.bukkit.plugin.java.JavaPlugin;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -14,5 +16,9 @@ public class DateUtils {
             throw new IllegalArgumentException("Invalid date \"" + date + "\", expected format dd/mm/yy", e);
         }
         return parsed.plusDays(days).format(FORMAT);
+    }
+
+    public static int getServerTime(JavaPlugin plugin){
+        return plugin.getServer().getCurrentTick();
     }
 }

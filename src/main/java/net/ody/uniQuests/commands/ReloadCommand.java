@@ -16,6 +16,7 @@ public class ReloadCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
+        if (!sender.isOp()) {return false;}
         QuestLoader loader=plugin.questLoader;
         plugin.quests=loader.loadAllQuests();
         plugin.playersData=loader.loadPlayersData();

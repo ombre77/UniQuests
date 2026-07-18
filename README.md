@@ -26,8 +26,9 @@ In order to add a quest, just add a field inside quests with the quest id (can b
 ```json
 {
 "created":"dd/MM/yy",
-"quests":{
-    "brand_new_quest":
+"quests": {
+  "brand_new_quest":{}
+  }
 }
 ```
 
