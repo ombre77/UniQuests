@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuestCreator — UniQuests Editor</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root{
+          --bg:            #0a0b14;
+          --bg-panel:      #131526;
+          --bg-panel-2:    #1a1d34;
+          --bg-inset:      #0a0c18;
+          --border:        #2c2f52;
+          --border-soft:   #1f2140;
+          --text:          #e7e8f7;
+          --text-muted:    #8489b3;
+          --violet:        #8b7cf6;
+          --violet-bright: #a99bff;
+          --blue:          #4fa4f7;
+          --blue-bright:   #74b9ff;
+          --danger:        #ef5d81;
+          --danger-bright: #ff7f9e;
+          --font-display:  'Sora', sans-serif;
+          --font-body:     'Inter', sans-serif;
+          --font-mono:     'JetBrains Mono', monospace;
+          --radius:        10px;
+        }
+
+        *{ box-sizing:border-box; }
+        HTML,body{ height:100%; }
+        body{
+          margin:0;
+          background:
+            radial-gradient(1100px 620px at 12% -8%, rgba(139,124,246,.38) 0%, transparent 58%),
+            radial-gradient(900px 620px at 100% 0%, rgba(79,164,247,.32) 0%, transparent 55%),
+            radial-gradient(800px 700px at 50% 115%, rgba(139,124,246,.16) 0%, transparent 60%),
+            #0a0b14;
+          color:var(--text);
+          font-family:var(--font-body);
+          font-size:14px;
+          display:flex;
+          flex-direction:column;
+        }
+
+        ::selection{ background:var(--violet); color:#0a0b14; }
+        ::-webkit-scrollbar{ width:10px; height:10px; }
+        ::-webkit-scrollbar-track{ background:transparent; }
+        ::-webkit-scrollbar-thumb{ background:var(--border); border-radius:6px; }
+        ::-webkit-scrollbar-thumb:hover{ background:var(--violet); }
+
+        a,button,input,select,textarea{ font-family:inherit; color:inherit; }
+        button{ cursor:pointer; }
+        input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible{
+          outline:2px solid var(--violet-bright);
+          outline-offset:1px;
+        }
+
+        /* ---------- header ---------- */
+        header{
+          display:flex;
+          align-items:center;
+          gap:20px;
+          padding:14px 22px;
+          background:linear-gradient(120deg, #1c1a3a 0%, #14162a 40%, #0d1830 100%);
+          border-bottom:1px solid var(--border-soft);
+          flex-wrap:wrap;
+        }
+        .brand{
+          display:flex;
+          align-items:baseline;
+          gap:10px;
+          margin-right:auto;
+        }
+        .brand h1{
+          font-family:var(--font-display);
+          font-weight:800;
+          font-size:21px;
+          letter-spacing:-.01em;
+          margin:0;
+          background:linear-gradient(90deg, #a99bff 0%, #8b7cf6 35%, #4fa4f7 75%, #74b9ff 100%);
+          -webkit-background-clip:text;
+          background-clip:text;
+          color:transparent;
+          filter:drop-shadow(0 0 14px rgba(139,124,246,.45));
+        }
+        .brand span{
+          font-size:11px;
+          color:var(--text-muted);
+          letter-spacing:.12em;
+          text-transform:uppercase;
+        }
+
+        .file-field{
+          display:flex;
+          flex-direction:column;
+          gap:2px;
+        }
+        .file-field label{
+          font-size:10px;
+          text-transform:uppercase;
+          letter-spacing:.1em;
+          color:var(--text-muted);
+        }
+        .file-field input{
+          background:var(--bg-inset);
+          border:1px solid var(--border-soft);
+          border-radius:8px;
+          padding:6px 8px;
+          font-family:var(--font-mono);
+          font-size:12.5px;
+          color:var(--text);
+          min-width:150px;
+        }
+
+        .btn{
+          display:inline-flex;
+          align-items:center;
+          gap:6px;
+          padding:8px 14px;
+          border-radius:8px;
+          border:1px solid var(--border);
+          background:var(--bg-panel-2);
+          color:var(--text);
+          font-size:12.5px;
+          font-weight:500;
+          letter-spacing:.02em;
+          text-decoration:none;
+          transition:border-color .15s, background .15s, transform .05s, box-shadow .15s;
+        }
+        .btn:hover{ border-color:var(--violet); background:#22254a; }
+        .btn:active{ transform:translateY(1px); }
+        .btn.gold{ background:linear-gradient(135deg,#a99bff 0%,#8b7cf6 45%,#4fa4f7 100%); border-color:#6a5cd6; color:#0a0b14; font-weight:700; box-shadow:0 2px 14px rgba(139,124,246,.35); }
+        .btn.gold:hover{ background:linear-gradient(135deg,#b8acff 0%,#9c8dff 45%,#63b0ff 100%); box-shadow:0 2px 20px rgba(139,124,246,.55); }
+        .btn.danger{ border-color:#7a3a52; color:#ffb9cb; }
+        .btn.danger:hover{ background:#301823; border-color:var(--danger); }
+        .btn.danger.confirm-armed{ background:var(--danger); border-color:var(--danger); color:#fff; animation:confirm-pulse 1s ease-in-out infinite; }
+        @keyframes confirm-pulse{
+          0%, 100%{ box-shadow:0 0 0 0 rgba(239,93,129,.55); }
+          50%{ box-shadow:0 0 0 5px rgba(239,93,129,0); }
+        }
+        .btn.ghost{ background:transparent; }
+        .btn:disabled{ opacity:.4; cursor:not-allowed; }
+        input[type=file]{ display:none; }
+
+        /* ---------- layout ---------- */
+        .layout{
+          flex:1;
+          display:grid;
+          grid-template-columns:280px 1fr 360px;
+          min-height:0;
+        }
+        @media (max-width:1100px){
+          .layout{ grid-template-columns:240px 1fr; }
+          .json-panel{ display:none; }
+        }
+
+        /* ---------- sidebar ---------- */
+        .sidebar{
+          border-right:1px solid var(--border-soft);
+          display:flex;
+          flex-direction:column;
+          min-height:0;
+          background:linear-gradient(180deg, #10121f, #0b0c17);
+        }
+        .sidebar-head{
+          padding:14px 16px 10px;
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+        }
+        .sidebar-head h2{
+          font-family:var(--font-display);
+          font-weight:600;
+          font-size:13px;
+          letter-spacing:.06em;
+          text-transform:uppercase;
+          color:var(--text-muted);
+          margin:0;
+        }
+        .meta-block{
+          padding:0 16px 12px;
+          border-bottom:1px solid var(--border-soft);
+        }
+        .meta-block .file-field{ margin-bottom:8px; }
+        .meta-block .file-field input{ width:100%; }
+
+        .quest-list{
+          flex:1;
+          overflow-y:auto;
+          padding:8px;
+          display:flex;
+          flex-direction:column;
+          gap:6px;
+        }
+        .quest-card{
+          position:relative;
+          border:1px solid var(--border-soft);
+          border-radius:var(--radius);
+          background:var(--bg-panel);
+          padding:9px 10px 9px 14px;
+          cursor:pointer;
+          transition:border-color .15s, background .15s, transform .1s;
+        }
+        .quest-card::before{
+          content:"";
+          position:absolute; left:0; top:8px; bottom:8px; width:3px;
+          background:var(--border-soft);
+          border-radius:2px;
+        }
+        .quest-card:hover{ background:var(--bg-panel-2); transform:translateX(1px); }
+        .quest-card.active{ border-color:var(--violet); background:#1c1e3c; box-shadow:0 0 0 1px rgba(139,124,246,.25), 0 0 18px rgba(139,124,246,.18); }
+        .quest-card.active::before{ width:4px; background:linear-gradient(180deg, #a99bff 0%, #8b7cf6 50%, #4fa4f7 100%); box-shadow:0 0 8px rgba(139,124,246,.6); }
+        .quest-card .card-delete{
+          position:absolute; top:7px; right:7px;
+          width:20px; height:20px;
+          display:flex; align-items:center; justify-content:center;
+          background:transparent;
+          border:1px solid transparent;
+          border-radius:6px;
+          color:var(--text-muted);
+          font-size:14px;
+          line-height:1;
+          padding:0;
+          opacity:0;
+          transition:opacity .15s, border-color .15s, color .15s, background .15s;
+        }
+        .quest-card:hover .card-delete{ opacity:1; }
+        .quest-card .card-delete:hover{ border-color:var(--danger); color:var(--danger-bright); background:#2b1420; }
+        .quest-card .card-delete.confirm-armed{
+          opacity:1;
+          border-color:var(--danger);
+          color:#fff;
+          background:var(--danger);
+          animation:confirm-pulse 1s ease-in-out infinite;
+        }
+        .quest-card .qname{ font-weight:600; font-size:13px; padding-right:20px; }
+        .quest-card .qid{ font-family:var(--font-mono); font-size:10.5px; color:var(--text-muted); margin-top:2px; }
+        .quest-card .qcount{ font-size:10px; color:var(--text-muted); margin-top:4px; }
+        .empty-hint{
+          margin:20px 14px;
+          font-size:12px;
+          color:var(--text-muted);
+          line-height:1.5;
+          text-align:center;
+        }
+
+        .sidebar-foot{
+          padding:12px;
+          border-top:1px solid var(--border-soft);
+        }
+        .sidebar-foot .btn{ width:100%; justify-content:center; }
+
+        /* ---------- editor ---------- */
+        .editor{
+          overflow-y:auto;
+          padding:24px 28px 60px;
+          min-height:0;
+        }
+        .editor .placeholder{
+          height:100%;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          color:var(--text-muted);
+          font-size:13px;
+          text-align:center;
+          flex-direction:column;
+          gap:10px;
+          padding-top:80px;
+        }
+        .section{
+          background:var(--bg-panel);
+          border:1px solid var(--border-soft);
+          border-radius:14px;
+          padding:16px 18px;
+          margin-bottom:16px;
+        }
+        .section-title{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          margin-bottom:12px;
+        }
+        .section-title h3{
+          font-family:var(--font-display);
+          font-weight:600;
+          font-size:14px;
+          letter-spacing:0;
+          margin:0;
+          color:var(--violet-bright);
+        }
+        .section-title .count{
+          font-size:11px;
+          color:var(--text-muted);
+          font-family:var(--font-mono);
+        }
+
+        .field-row{ display:flex; gap:12px; margin-bottom:10px; flex-wrap:wrap; }
+        .field{ flex:1; min-width:140px; display:flex; flex-direction:column; gap:4px; }
+        .field label{ font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-muted); }
+        .field input, .field select, .field textarea{
+          background:var(--bg-inset);
+          border:1px solid var(--border-soft);
+          border-radius:8px;
+          padding:8px 9px;
+          font-size:13px;
+          color:var(--text);
+        }
+        .field textarea{ resize:vertical; min-height:52px; font-family:var(--font-body); }
+        .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--violet); }
+
+        .entry-list{ display:flex; flex-direction:column; gap:8px; }
+        .entry{
+          display:flex;
+          align-items:flex-end;
+          gap:8px;
+          background:var(--bg-inset);
+          border:1px solid var(--border-soft);
+          border-radius:10px;
+          padding:10px;
+          flex-wrap:wrap;
+        }
+        .entry .field{ min-width:110px; }
+        .entry .remove-btn{
+          align-self:center;
+          background:transparent;
+          border:1px solid var(--border-soft);
+          color:var(--danger-bright);
+          border-radius:8px;
+          width:30px; height:34px;
+          font-size:15px;
+          line-height:1;
+        }
+        .entry .remove-btn:hover{ border-color:var(--danger); background:#2b1420; }
+
+        .add-row{
+          display:flex;
+          gap:8px;
+          margin-top:10px;
+          flex-wrap:wrap;
+        }
+        .add-row select{
+          background:var(--bg-inset);
+          border:1px solid var(--border-soft);
+          border-radius:8px;
+          padding:7px 9px;
+          font-size:12.5px;
+        }
+
+        .chip{
+          font-family:var(--font-mono);
+          font-size:10px;
+          text-transform:uppercase;
+          letter-spacing:.06em;
+          padding:3px 7px;
+          border-radius:20px;
+          border:1px solid var(--border);
+          color:var(--text-muted);
+          white-space:nowrap;
+        }
+        .chip.have{ color:#7fc4ff; border-color:#2c4d75; }
+        .chip.killed{ color:#ff9db3; border-color:#6b3350; }
+        .chip.placed{ color:#c9b8ff; border-color:#4d3f7d; }
+        .chip.quest{ color:#b39dff; border-color:#453a7d; }
+        .chip.item{ color:var(--blue-bright); border-color:#2c4d75; }
+        .chip.exp{ color:var(--violet-bright); border-color:#453a7d; }
+        .chip.coin{ color:#ffd27a; border-color:#6b5525; }
+
+        .danger-zone{
+          display:flex; justify-content:flex-end; margin-top:4px;
+        }
+
+        /* ---------- JSON panel ---------- */
+        .json-panel{
+          border-left:1px solid var(--border-soft);
+          display:flex;
+          flex-direction:column;
+          min-height:0;
+          background:#0a0b16;
+        }
+        .json-head{
+          padding:12px 16px;
+          border-bottom:1px solid var(--border-soft);
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+        }
+        .json-head h2{
+          font-family:var(--font-display);
+          font-weight:600;
+          font-size:13px;
+          letter-spacing:.06em;
+          text-transform:uppercase;
+          color:var(--text-muted);
+          margin:0;
+        }
+        #jsonOut{
+          flex:1;
+          margin:0;
+          padding:16px;
+          overflow:auto;
+          font-family:var(--font-mono);
+          font-size:11.5px;
+          line-height:1.6;
+          color:#b9c3f0;
+          white-space:pre;
+          background:var(--bg-inset);
+          border:none;
+          resize:none;
+          tab-size:2;
+        }
+        #jsonOut:focus{ outline:none; box-shadow:inset 0 0 0 2px rgba(139,124,246,.35); }
+        .json-foot{
+          padding:10px 16px;
+          border-top:1px solid var(--border-soft);
+          font-size:11px;
+          color:var(--text-muted);
+        }
+        .json-foot.err{ color:var(--danger-bright); }
+        .toast{
+          position:fixed;
+          bottom:20px; left:50%;
+          transform:translateX(-50%) translateY(20px);
+          background:#1c1e3c;
+          border:1px solid var(--violet);
+          color:var(--violet-bright);
+          padding:10px 18px;
+          border-radius:10px;
+          font-size:12.5px;
+          opacity:0;
+          pointer-events:none;
+          transition:opacity .2s, transform .2s;
+          z-index:50;
+          box-shadow:0 8px 30px rgba(0,0,0,.4);
+        }
+        .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+        .toast.err{ border-color:var(--danger); color:var(--danger-bright); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="brand">
+        <h1>QuestCreator</h1>
+        <span>UniQuests editor</span>
+    </div>
+    <a class="btn ghost icon-btn" id="githubLink" href="https://github.com/ombre77/UniQuests" target="_blank" rel="noopener noreferrer" title="View repo on GitHub" aria-label="View repo on GitHub">
+        <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+    </a>
+    <a class="btn ghost" id="readmeLink" href="https://github.com/ombre77/UniQuests/blob/master/README.md" target="_blank" rel="noopener noreferrer">README ↗</a>
+    <div class="file-field">
+        <label for="createdInput">Created (dd/MM/yy)</label>
+        <input id="createdInput" type="text" placeholder="18/07/26" maxlength="8">
+    </div>
+    <button class="btn ghost" id="importBtn">Edit JSON</button>
+    <input type="file" id="importInput" accept="application/json,.json">
+    <button class="btn gold" id="exportBtn">Export JSON</button>
+</header>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="sidebar-head">
+            <h2>Quests</h2>
+            <span class="count" id="questTotal" style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)"></span>
+        </div>
+        <div class="meta-block">
+            <div class="file-field">
+                <label for="fileNameInput">File name</label>
+                <input id="fileNameInput" type="text" placeholder="daily/my_quests.json">
+            </div>
+        </div>
+        <div class="quest-list" id="questList"></div>
+        <div class="sidebar-foot">
+            <div class="file-field" style="margin-bottom:8px;">
+                <label for="newQuestIdInput">New quest ID (optional)</label>
+                <input id="newQuestIdInput" type="text" placeholder="brand_new_quest" style="width:100%;">
+            </div>
+            <button class="btn gold" id="addQuestBtn">+ New quest</button>
+        </div>
+    </aside>
+
+    <main class="editor" id="editor">
+        <div class="placeholder">
+            <div>No quest selected.<br>Create a new quest or type directly into the JSON panel to begin.</div>
+        </div>
+    </main>
+
+    <aside class="json-panel">
+        <div class="json-head">
+            <h2>JSON (editable)</h2>
+        </div>
+        <label for="jsonOut"></label><textarea id="jsonOut" spellcheck="false"></textarea>
+        <div class="json-foot" id="jsonStatus">Valid JSON — edits here apply live.</div>
+    </aside>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    (function(){
+      "use strict";
+
+      /* ---------------- state ---------------- */
+      let data = { created: todayStr(), quests: {} };
+      let activeId = null;
+      let fileName = "new_quests.json";
+
+      function todayStr(){
+        const d = new Date();
+        const p = n => String(n).padStart(2,'0');
+        return `${p(d.getDate())}/${p(d.getMonth()+1)}/${p(d.getFullYear()%100)}`;
+      }
+
+      function uid(base){
+        let id = base || "new_quest";
+        id = id.trim().toLowerCase().replace(/[^a-z0-9_]+/g,'_').replace(/^_+|_+$/g,'') || "quest";
+        let candidate = id, n = 1;
+        while (data.quests[candidate]) { candidate = `${id}_${n++}`; }
+        return candidate;
+      }
+
+      function blankQuest(){
+        return { display_name:"", desc:"", requirements:[], price:[], reward:[] };
+      }
+
+      function normalizeData(parsed){
+        if (typeof parsed !== 'object' || parsed === null) throw new Error("Root is not an object");
+        const normalized = {
+          created: typeof parsed.created === 'string' ? parsed.created : todayStr(),
+          quests: (parsed.quests && typeof parsed.quests === 'object') ? parsed.quests : {}
+        };
+        for (const qid in normalized.quests){
+          const q = normalized.quests[qid];
+          q.requirements = Array.isArray(q.requirements) ? q.requirements : [];
+          q.price        = Array.isArray(q.price) ? q.price : [];
+          q.reward       = Array.isArray(q.reward) ? q.reward : [];
+        }
+        return normalized;
+      }
+
+      function debounce(fn, ms){
+        let t;
+        return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+      }
+
+      // Native confirm()/alert() dialogs are blocked in some sandboxed preview
+      // contexts, which silently breaks click handlers that rely on them. This
+      // gives destructive buttons a "tap again to confirm" state instead.
+      function armConfirm(btn, { idleLabel, armedLabel, idleTitle, armedTitle, onConfirm, timeout = 2500 }){
+        let armed = false, timer = null;
+        if (idleLabel !== undefined) btn.textContent = idleLabel;
+        if (idleTitle) btn.title = idleTitle;
+        btn.addEventListener('click', (e) => {
+          if (e.stopPropagation) e.stopPropagation();
+          if (!armed){
+            armed = true;
+            btn.classList.add('confirm-armed');
+            if (armedLabel !== undefined) btn.textContent = armedLabel;
+            if (armedTitle) btn.title = armedTitle;
+            timer = setTimeout(() => {
+              armed = false;
+              btn.classList.remove('confirm-armed');
+              if (idleLabel !== undefined) btn.textContent = idleLabel;
+              if (idleTitle) btn.title = idleTitle;
+            }, timeout);
+          } else {
+            clearTimeout(timer);
+            armed = false;
+            btn.classList.remove('confirm-armed');
+            onConfirm();
+          }
+        });
+      }
+
+      /* ---------------- toast ---------------- */
+      let toastTimer;
+      function toast(msg, isErr){
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.toggle('err', !!isErr);
+        el.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(()=> el.classList.remove('show'), 2200);
+      }
+
+      /* ---------------- dom refs ---------------- */
+      const createdInput   = document.getElementById('createdInput');
+      const fileNameInput   = document.getElementById('fileNameInput');
+      const questList       = document.getElementById('questList');
+      const questTotal      = document.getElementById('questTotal');
+      const editor           = document.getElementById('editor');
+      const jsonOut          = document.getElementById('jsonOut');
+      const importInput      = document.getElementById('importInput');
+
+      createdInput.addEventListener('input', () => { data.created = createdInput.value; renderJson(); });
+      fileNameInput.addEventListener('input', () => { fileName = fileNameInput.value.trim() || "new_quests.json"; });
+
+      const newQuestIdInput = document.getElementById('newQuestIdInput');
+      document.getElementById('addQuestBtn').addEventListener('click', () => {
+        const id = uid(newQuestIdInput.value || "new_quest");
+        data.quests[id] = blankQuest();
+        data.quests[id].display_name = "New Quest";
+        activeId = id;
+        newQuestIdInput.value = "";
+        renderAll();
+      });
+
+      document.getElementById('importBtn').addEventListener('click', () => importInput.click());
+      importInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            data = normalizeData(JSON.parse(reader.result));
+            fileName = file.name;
+            activeId = Object.keys(data.quests)[0] || null;
+            syncMetaInputs();
+            renderAll();
+            toast(`Imported ${Object.keys(data.quests).length} quest(s) from ${file.name}.`);
+          } catch (err){
+            toast("Couldn't parse that file: " + err.message, true);
+          }
+        };
+        reader.readAsText(file);
+        importInput.value = "";
+      });
+
+      document.getElementById('exportBtn').addEventListener('click', () => {
+        if (!fileName.toLowerCase().endsWith('.json')) fileName += '.json';
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = fileName;
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+        toast(`Exported ${fileName}`);
+      });
+
+      function syncMetaInputs(){
+        createdInput.value = data.created || "";
+        fileNameInput.value = fileName;
+      }
+
+      /* ---------------- sidebar ---------------- */
+      function renderQuestList(){
+        const ids = Object.keys(data.quests);
+        questTotal.textContent = ids.length ? `${ids.length} quest${ids.length>1?'s':''}` : "";
+        questList.innerHTML = "";
+        if (!ids.length){
+          questList.innerHTML = `<div class="empty-hint">No quests yet.<br>Click “+ New quest” to add one.</div>`;
+          return;
+        }
+        ids.forEach(id => {
+          const q = data.quests[id];
+          const card = document.createElement('div');
+          card.className = "quest-card" + (id === activeId ? " active" : "");
+          const reqCount = (q.requirements||[]).length;
+          const rewCount = (q.reward||[]).length;
+          card.innerHTML = `
+            <button class="card-delete" title="Delete quest" aria-label="Delete quest">×</button>
+            <div class="qname">${escapeHtml(q.display_name || "(untitled)")}</div>
+            <div class="qid">${escapeHtml(id)}</div>
+            <div class="qcount">${reqCount} req · ${rewCount} reward${rewCount!==1?'s':''}</div>`;
+          card.addEventListener('click', () => { activeId = id; renderAll(); });
+          armConfirm(card.querySelector('.card-delete'), {
+            idleLabel: '×',
+            armedLabel: '✓',
+            idleTitle: 'Delete quest',
+            armedTitle: 'Click again to confirm delete',
+            onConfirm: () => {
+              delete data.quests[id];
+              if (activeId === id) activeId = Object.keys(data.quests)[0] || null;
+              renderAll();
+            }
+          });
+          questList.appendChild(card);
+        });
+      }
+
+      /* ---------------- editor ---------------- */
+      function renderEditor(){
+        if (!activeId || !data.quests[activeId]){
+          editor.innerHTML = `<div class="placeholder"><div>No quest selected.<br>Create a new quest or type directly into the JSON panel to begin.</div></div>`;
+          return;
+        }
+        const q = data.quests[activeId];
+        editor.innerHTML = "";
+
+        // --- basics ---
+        const basics = section("Quest basics", "");
+        basics.body.innerHTML = `
+          <div class="field-row">
+            <div class="field">
+              <label for="f_id">Quest ID (key)</label>
+              <input id="f_id" type="text" value="${escapeAttr(activeId)}">
+            </div>
+            <div class="field">
+              <label for="f_name">Display name</label>
+              <input id="f_name" type="text" value="${escapeAttr(q.display_name||"")}" placeholder="Get started">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="f_desc">Description</label>
+              <textarea id="f_desc" placeholder="A quest to guide you on how to get started">${escapeHtml(q.desc||"")}</textarea>
+            </div>
+          </div>
+          <div class="danger-zone">
+            <button class="btn danger" id="deleteQuestBtn">Delete quest</button>
+          </div>`;
+        editor.appendChild(basics.el);
+
+        basics.body.querySelector('#f_id').addEventListener('change', (e) => {
+          const newId = e.target.value.trim();
+          if (!newId){ toast("Quest ID can't be empty.", true); e.target.value = activeId; return; }
+          if (newId !== activeId && data.quests[newId]){ toast(`ID "${newId}" is already used.`, true); e.target.value = activeId; return; }
+          if (newId !== activeId){
+            data.quests[newId] = data.quests[activeId];
+            delete data.quests[activeId];
+            activeId = newId;
+            renderAll();
+          }
+        });
+        basics.body.querySelector('#f_name').addEventListener('input', (e) => { q.display_name = e.target.value; renderQuestList(); renderJson(); });
+        basics.body.querySelector('#f_desc').addEventListener('input', (e) => { q.desc = e.target.value; renderJson(); });
+        armConfirm(basics.body.querySelector('#deleteQuestBtn'), {
+          idleLabel: 'Delete quest',
+          armedLabel: 'Click again to confirm',
+          onConfirm: () => {
+            delete data.quests[activeId];
+            activeId = Object.keys(data.quests)[0] || null;
+            renderAll();
+          }
+        });
+
+        // --- requirements ---
+        editor.appendChild(buildListSection({
+          title:"Requirements", list:q.requirements, chipClass:'have',
+          typeOptions:[
+            {value:'have', label:'Have item'},
+            {value:'killed', label:'Killed mob'},
+            {value:'placed', label:'Placed block'},
+            {value:'quest', label:'Completed quest'},
+          ],
+          defaults:{
+            have:{type:'have', item:'', amount:1},
+            killed:{type:'killed', mob:'', amount:1},
+            placed:{type:'placed', block:'', amount:1},
+            quest:{type:'quest', quest_id:''},
+          },
+          fieldsFor: reqFields,
+        }));
+
+        // --- price ---
+        editor.appendChild(buildListSection({
+          title:"Price", list:q.price, chipClass:'item',
+          typeOptions:[
+            {value:'item', label:'Item'},
+            {value:'exp', label:'Experience'},
+          ],
+          defaults:{
+            item:{type:'item', item:'', amount:1},
+            exp:{type:'exp', exp:'level', amount:1},
+          },
+          fieldsFor: priceFields,
+        }));
+
+        // --- reward ---
+        editor.appendChild(buildListSection({
+          title:"Reward", list:q.reward, chipClass:'item',
+          typeOptions:[
+            {value:'item', label:'Item'},
+            {value:'exp', label:'Experience'},
+            {value:'coin', label:'Event coin'},
+          ],
+          defaults:{
+            item:{type:'item', item:'', amount:1},
+            exp:{type:'exp', exp:'points', amount:1},
+            coin:{type:'coin', amount:1},
+          },
+          fieldsFor: rewardFields,
+          allowChance:true,
+        }));
+      }
+
+      function section(title, subtitle){
+        const el = document.createElement('div');
+        el.className = "section";
+        el.innerHTML = `<div class="section-title"><h3>${title}</h3><span class="count">${subtitle}</span></div><div class="section-body"></div>`;
+        return { el, body: el.querySelector('.section-body') };
+      }
+
+      function reqFields(entry){
+        switch(entry.type){
+          case 'have': return [
+            {key:'item', label:'Item', type:'text', placeholder:'dirt'},
+            {key:'amount', label:'Amount', type:'number', placeholder:'32'},
+          ];
+          case 'killed': return [
+            {key:'mob', label:'Mob', type:'text', placeholder:'pig'},
+            {key:'amount', label:'Amount', type:'number', placeholder:'10'},
+          ];
+          case 'placed': return [
+            {key:'block', label:'Block', type:'text', placeholder:'stone'},
+            {key:'amount', label:'Amount', type:'number', placeholder:'25'},
+          ];
+          case 'quest': return [
+            {key:'quest_id', label:'Quest ID', type:'text', placeholder:'brand_new_quest'},
+          ];
+          default: return [];
+        }
+      }
+      function priceFields(entry){
+        switch(entry.type){
+          case 'item': return [
+            {key:'item', label:'Item', type:'text', placeholder:'dirt'},
+            {key:'amount', label:'Amount', type:'number', placeholder:'32'},
+          ];
+          case 'exp': return [
+            {key:'exp', label:'Exp type', type:'select', options:['level','points']},
+            {key:'amount', label:'Amount', type:'number', placeholder:'1'},
+          ];
+          default: return [];
+        }
+      }
+      function rewardFields(entry){
+        switch(entry.type){
+          case 'item': return [
+            {key:'item', label:'Item', type:'text', placeholder:'emerald'},
+            {key:'amount', label:'Amount', type:'number', placeholder:'10'},
+          ];
+          case 'exp': return [
+            {key:'exp', label:'Exp type', type:'select', options:['level','points']},
+            {key:'amount', label:'Amount', type:'number', placeholder:'100'},
+          ];
+          case 'coin': return [
+            {key:'amount', label:'Amount', type:'number', placeholder:'5'},
+          ];
+          default: return [];
+        }
+      }
+
+      function buildListSection(cfg){
+        const { title, list, typeOptions, defaults, fieldsFor, allowChance } = cfg;
+        const s = section(title, `${list.length} entr${list.length===1?'y':'ies'}`);
+        const wrap = document.createElement('div');
+        wrap.className = "entry-list";
+        s.body.appendChild(wrap);
+
+        if (!list.length){
+          const hint = document.createElement('div');
+          hint.style.cssText = "font-size:12px;color:var(--text-muted);padding:4px 2px;";
+          hint.textContent = "None yet.";
+          wrap.appendChild(hint);
+        }
+
+        list.forEach((entry, idx) => {
+          const row = document.createElement('div');
+          row.className = "entry";
+
+          const chip = document.createElement('span');
+          chip.className = "chip " + (entry.type || "");
+          chip.textContent = entry.type || "?";
+          row.appendChild(chip);
+
+          fieldsFor(entry).forEach(f => {
+            const field = document.createElement('div');
+            field.className = "field";
+            const label = document.createElement('label');
+            label.textContent = f.label;
+            field.appendChild(label);
+            let input;
+            if (f.type === 'select'){
+              input = document.createElement('select');
+              f.options.forEach(o => {
+                const opt = document.createElement('option');
+                opt.value = o; opt.textContent = o;
+                if (entry[f.key] === o) opt.selected = true;
+                input.appendChild(opt);
+              });
+            } else {
+              input = document.createElement('input');
+              input.type = f.type;
+              if (f.type === 'number') input.min = "0";
+              input.placeholder = f.placeholder || "";
+              input.value = entry[f.key] ?? "";
+            }
+            input.addEventListener('input', () => {
+              entry[f.key] = f.type === 'number' ? Number(input.value) : input.value;
+              renderJson();
+            });
+            field.appendChild(input);
+            row.appendChild(field);
+          });
+
+          if (allowChance){
+            const field = document.createElement('div');
+            field.className = "field";
+            field.innerHTML = `<label>Chance % (optional)</label>`;
+            const input = document.createElement('input');
+            input.type = 'number'; input.min = "0"; input.max = "100";
+            input.placeholder = "e.g. 25";
+            input.value = entry.chance ?? "";
+            input.addEventListener('input', () => {
+              if (input.value === "") delete entry.chance;
+              else entry.chance = Number(input.value);
+              renderJson();
+            });
+            field.appendChild(input);
+            row.appendChild(field);
+          }
+
+          const removeBtn = document.createElement('button');
+          removeBtn.className = "remove-btn";
+          removeBtn.title = "Remove entry";
+          removeBtn.textContent = "×";
+          removeBtn.addEventListener('click', () => {
+            list.splice(idx, 1);
+            renderAll();
+          });
+          row.appendChild(removeBtn);
+
+          wrap.appendChild(row);
+        });
+
+        const addRow = document.createElement('div');
+        addRow.className = "add-row";
+        const select = document.createElement('select');
+        typeOptions.forEach(o => {
+          const opt = document.createElement('option');
+          opt.value = o.value; opt.textContent = o.label;
+          select.appendChild(opt);
+        });
+        const addBtn = document.createElement('button');
+        addBtn.className = "btn ghost";
+        addBtn.textContent = "+ Add entry";
+        addBtn.addEventListener('click', () => {
+          const def = defaults[select.value];
+          list.push(JSON.parse(JSON.stringify(def)));
+          renderAll();
+        });
+        addRow.appendChild(select);
+        addRow.appendChild(addBtn);
+        s.body.appendChild(addRow);
+
+        return s.el;
+      }
+
+      /* ---------------- JSON preview (read+write) ---------------- */
+      const jsonStatus = document.getElementById('jsonStatus');
+
+      function renderJson(){
+        jsonOut.value = JSON.stringify(data, null, 2);
+        jsonStatus.textContent = "Valid JSON — edits here apply live.";
+        jsonStatus.classList.remove('err');
+      }
+
+      const applyJsonFromTextarea = debounce(() => {
+        let parsed;
+        try {
+          parsed = normalizeData(JSON.parse(jsonOut.value));
+        } catch (err){
+          jsonStatus.textContent = "Invalid JSON — fix the syntax to apply changes: " + err.message;
+          jsonStatus.classList.add('err');
+          return;
+        }
+        data = parsed;
+        if (!data.quests[activeId]) activeId = Object.keys(data.quests)[0] || null;
+        syncMetaInputs();
+        renderQuestList();
+        renderEditor();
+        jsonStatus.textContent = "Valid JSON — edits here apply live.";
+        jsonStatus.classList.remove('err');
+      }, 400);
+
+      jsonOut.addEventListener('input', applyJsonFromTextarea);
+      jsonOut.addEventListener('blur', () => {
+        try {
+          data = normalizeData(JSON.parse(jsonOut.value));
+          if (!data.quests[activeId]) activeId = Object.keys(data.quests)[0] || null;
+          syncMetaInputs();
+          renderQuestList();
+          renderEditor();
+          renderJson();
+        } catch (err){
+          jsonStatus.textContent = "Invalid JSON — fix the syntax to apply changes: " + err.message;
+          jsonStatus.classList.add('err');
+        }
+      });
+
+      function renderAll(){
+        renderQuestList();
+        renderEditor();
+        renderJson();
+      }
+
+      function escapeHtml(str){
+        return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      }
+      function escapeAttr(str){ return escapeHtml(str); }
+
+      /* ---------------- init ---------------- */
+      syncMetaInputs();
+      renderAll();
+    })();
+</script>
+</body>
+</html>
