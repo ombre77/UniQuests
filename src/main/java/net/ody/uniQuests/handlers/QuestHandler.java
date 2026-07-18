@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.ody.uniQuests.UniQuests;
 import net.ody.uniQuests.modules.*;
+import net.ody.uniQuests.utils.Item;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -255,7 +256,7 @@ public class QuestHandler {
                 case "item" -> {
                     Material rewardMat=Material.getMaterial(reward.item.toUpperCase(Locale.ROOT));
                     if (rewardMat==null){
-                        player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.item!=Item.VALD_ITEM");
+                        player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.item!=Item.VALID_ITEM");
                         continue;
                     }
                     ItemStack rewardItem = new ItemStack(rewardMat,reward.amount);
@@ -269,13 +270,22 @@ public class QuestHandler {
                     } else if (reward.exp.equals("points")) {
                         player.giveExp(reward.amount);
                     } else {
-                        player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.exp!=Exp.VALD_TYPE");
+                        player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.exp!=Exp.VALID_TYPE");
                         continue;
                     }
                     player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
                             .append(Component.text(reward.amount+" "+reward.exp+" of exp",NamedTextColor.GOLD)));
-
                 }
+                case "coins","coin" -> {
+                    ItemStack coin= Item.createItem(Material.HONEYCOMB,
+                            Component.text("EVENT COIN",NamedTextColor.GOLD),
+                            List.of(Component.text("/eventclaim to redeem!",NamedTextColor.DARK_GRAY)));
+                    coin.setAmount(reward.amount);
+                    player.give(coin);
+                    player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
+                            .append(Component.text(reward.amount+" event coins",NamedTextColor.GOLD)));
+                }
+                default -> player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.type!=Reward.VALID_TYPE");
             }
         }
     }
