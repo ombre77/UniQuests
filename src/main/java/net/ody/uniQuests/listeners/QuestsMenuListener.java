@@ -39,25 +39,25 @@ public class QuestsMenuListener implements Listener {
             }
             case 12 -> {
                 player.sendMessage(Component.text("This functionality isn't ready yet!", NamedTextColor.RED));
-                return;
-                //player.closeInventory();
-                //SeeQuestsMenu.open(player,plugin,"daily");
+                //return;
+                player.closeInventory();
+                SeeQuestsMenu.open(player,plugin,"daily");
             }
             case 14 -> {
                 player.sendMessage(Component.text("This functionality isn't ready yet!", NamedTextColor.RED));
-                return;
-                //player.closeInventory();
-                //SeeQuestsMenu.open(player,plugin,"weekly");
+                //return;
+                player.closeInventory();
+                SeeQuestsMenu.open(player,plugin,"weekly");
             }
             case 16 -> {
                 player.sendMessage(Component.text("This functionality isn't ready yet!", NamedTextColor.RED));
-                return;
-                //player.closeInventory();
-                //SeeQuestsMenu.open(player,plugin,"monthly");
+                //return;
+                player.closeInventory();
+                SeeQuestsMenu.open(player,plugin,"monthly");
             }
             case 22 -> {
                 player.sendMessage(Component.text("This functionality isn't ready yet!", NamedTextColor.RED));
-                return;
+                //return;
             }
             case 0->{
                 SeeQuestsMenu.open(player,plugin,"followed");

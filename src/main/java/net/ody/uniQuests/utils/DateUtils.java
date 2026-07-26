@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 public class DateUtils {
-    private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("dd/MM/yy");
+    public static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("dd/MM/yy");
     public static String addDays(String date, int days) {
         LocalDate parsed;
         try {
@@ -16,6 +16,11 @@ public class DateUtils {
             throw new IllegalArgumentException("Invalid date \"" + date + "\", expected format dd/mm/yy", e);
         }
         return parsed.plusDays(days).format(FORMAT);
+    }
+
+    public static String getDay(){
+        LocalDate date=LocalDate.now();
+        return FORMAT.format(date);
     }
 
     public static int getServerTime(JavaPlugin plugin){

@@ -5,12 +5,14 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.ody.uniQuests.UniQuests;
 import net.ody.uniQuests.modules.*;
+import net.ody.uniQuests.utils.DateUtils;
 import net.ody.uniQuests.utils.Item;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -290,4 +292,28 @@ public class QuestHandler {
         }
     }
 
+    public static boolean isQuestInTime(Quest quest) {
+        if (quest.type.equals("global")) {
+            return true;
+        }
+        LocalDate expireDate = LocalDate.parse(quest.expire, DateUtils.FORMAT);
+        return !LocalDate.now().isAfter(expireDate);
+    }
+
+    public static void disableOutTime(UniQuests plugin){
+        int deleted=0;
+        for (Map.Entry<String,Quest> QuestEntry:plugin.quests.entrySet()){
+            String id=QuestEntry.getKey();
+            Quest quest=QuestEntry.getValue();
+
+            if (isQuestInTime(quest)){
+                continue;
+            }
+            plugin.quests.remove(id,quest);
+            deleted++;
+        }
+        if (deleted>0){
+            plugin.quests=plugin.questLoader.loadAllQuests();
+        }
+    }
 }

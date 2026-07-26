@@ -1,6 +1,7 @@
 package net.ody.uniQuests.commands;
 
 import net.ody.uniQuests.UniQuests;
+import net.ody.uniQuests.handlers.QuestHandler;
 import net.ody.uniQuests.modules.QuestLoader;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -21,6 +22,7 @@ public class ReloadCommand implements CommandExecutor {
         plugin.quests=loader.loadAllQuests();
         plugin.playersData=loader.loadPlayersData();
         plugin.playersStats=loader.loadPlayersStats();
+        QuestHandler.disableOutTime(plugin);
         return true;
     }
 }
