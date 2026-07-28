@@ -1,0 +1,13 @@
+# Enable or disable the disabling of quests when outdated
+enable-disabling : true
+
+# Enable or disable the deleting of disabled quests after a certain delay
+enable-deleting : true
+# Delay for deleting disabled quests (in days, does not support floats)
+# If 'trash-bin' is enabled, this delay will add to the 'trash-delay'
+deleting-delay : 3
+
+# Enable/Disable the transfer of disabled quests to the "TrashBin" folder before deletion
+trash-bin : true
+# Number of days before a disabled quests get send to the TrashBin folder
+trash-delay : 1

@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.ody.uniQuests.UniQuests;
+import net.ody.uniQuests.UniQuestsFileManager;
 import net.ody.uniQuests.modules.*;
 import net.ody.uniQuests.utils.DateUtils;
 import net.ody.uniQuests.utils.Item;
@@ -12,6 +13,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -297,23 +301,48 @@ public class QuestHandler {
             return true;
         }
         LocalDate expireDate = LocalDate.parse(quest.expire, DateUtils.FORMAT);
-        return !LocalDate.now().isAfter(expireDate);
+        return LocalDate.now().isBefore(expireDate);
     }
 
-    public static void disableOutTime(UniQuests plugin){
-        int deleted=0;
-        for (Map.Entry<String,Quest> QuestEntry:plugin.quests.entrySet()){
-            String id=QuestEntry.getKey();
-            Quest quest=QuestEntry.getValue();
-
-            if (isQuestInTime(quest)){
-                continue;
+    public static void disableOutTime(UniQuests plugin) {
+        int before = plugin.quests.size();
+        plugin.quests.entrySet().removeIf(entry -> {
+            Quest quest = entry.getValue();
+            if (isQuestInTime(quest)) {
+                return false;
             }
-            plugin.quests.remove(id,quest);
-            deleted++;
+            disableQuestFile(quest, plugin);
+            return true;
+        });
+        int deleted = before - plugin.quests.size();
+        if (deleted > 0) {
+            plugin.getLogger().info(deleted + " quest(s) disabled for being out of time.");
         }
-        if (deleted>0){
-            plugin.quests=plugin.questLoader.loadAllQuests();
+    }
+
+    public static void disableQuestFile(Quest quest, UniQuests plugin) {
+        if (!plugin.config.disabling) return;
+
+        UniQuestsFileManager fileManager = plugin.fileManager;
+        File file = fileManager.getQuestFile(quest.file_name, quest.type);
+        if (!file.exists() || file.getName().endsWith(".disabled")) {
+            return;
+        }
+        File newFile = new File(file.getParentFile(), file.getName() + ".disabled");
+        try {
+            Files.move(file.toPath(), newFile.toPath());
+            plugin.logger.info("Disabling file " + file.getName());
+        } catch (IOException e) {
+            plugin.logger.warning("Failed to disable quest file '" + file.getName() + "': " + e.getMessage());
+        }
+    }
+
+    public static void deleteQuestFile(String fileName,UniQuests plugin){
+        if (!plugin.config.deleting) return;
+
+        UniQuestsFileManager manager=plugin.fileManager;
+        if (plugin.config.trashBin){
+            manager.getTrash(fileName).delete();
         }
     }
 }

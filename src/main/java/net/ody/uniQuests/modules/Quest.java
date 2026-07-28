@@ -12,4 +12,5 @@ public class Quest {
     public String created;
     public String expire;
     public String id;
+    public String file_name;
 }

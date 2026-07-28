@@ -6,14 +6,10 @@ import net.ody.uniQuests.listeners.QuestDetailMenuListener;
 import net.ody.uniQuests.listeners.QuestProgressListener;
 import net.ody.uniQuests.listeners.QuestsMenuListener;
 import net.ody.uniQuests.listeners.SeeQuestsMenuListener;
-import net.ody.uniQuests.modules.PlayerData;
-import net.ody.uniQuests.modules.PlayerStats;
-import net.ody.uniQuests.modules.Quest;
-import net.ody.uniQuests.modules.QuestLoader;
+import net.ody.uniQuests.modules.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -28,6 +24,8 @@ public final class UniQuests extends JavaPlugin {
     public Map<String, Quest> quests;
     public Map<String, PlayerData> playersData;
     public Map<String, PlayerStats> playersStats;
+
+    public Configuration config;
 
     @Override
     public void onEnable() {
@@ -47,6 +45,9 @@ public final class UniQuests extends JavaPlugin {
         quests=questLoader.loadAllQuests();
         playersData=questLoader.loadPlayersData();
         playersStats=questLoader.loadPlayersStats();
+
+        //load settings
+        config=new Configuration(this);
 
         logger.info("UniQuests loaded!");
     }

@@ -16,6 +16,7 @@ public class UniQuestsFileManager {
     private File dailyQuests;
     private File weeklyQuests;
     private File monthlyQuests;
+    private File trashbin;
 
     private File playersData;
     private File playersStats;
@@ -73,11 +74,15 @@ public class UniQuestsFileManager {
         dailyQuests=assureFolder("daily",questsFolder);
         weeklyQuests=assureFolder("weekly",questsFolder);
         monthlyQuests=assureFolder("monthly",questsFolder);
+        trashbin=assureFolder("TrashBin",dataFolder);
 
 
         //Files
         playersData=assureFile("playersData.json");
         playersStats=assureFile("playersStats.json");
+
+        //config
+        plugin.saveDefaultConfig();
 
     }
 
@@ -89,7 +94,7 @@ public class UniQuestsFileManager {
 
     public File getQuestsFolder() {
         if (questsFolder==null){
-            throw new IllegalStateException("UniQuestsFileManager.setup() must be called before qetQuestsFolder(). Missing quests folder.");
+            throw new IllegalStateException("UniQuestsFileManager.setup() must be called before getQuestsFolder(). Missing quests folder.");
         }
         return questsFolder;
     }
@@ -100,14 +105,14 @@ public class UniQuestsFileManager {
 
     public File getPlayersData(){
         if (questsFolder==null){
-            throw new IllegalStateException("UniQuestsFileManager.setup() must be called before qetPlayersData(). Missing playerData file.");
+            throw new IllegalStateException("UniQuestsFileManager.setup() must be called before getPlayersData(). Missing playerData file.");
         }
         return playersData;
     }
 
     public File getPlayersStats(){
         if (questsFolder==null){
-            throw new IllegalStateException("UniQuestsFileManager.setup() must be called before qetPlayersStats(). Missing playerStats file.");
+            throw new IllegalStateException("UniQuestsFileManager.setup() must be called before getPlayersStats(). Missing playerStats file.");
         }
         return playersStats;
     }
@@ -130,5 +135,25 @@ public class UniQuestsFileManager {
     public File getMonthlyQuests() {
         checkForNull(monthlyQuests);
         return monthlyQuests;
+    }
+
+    public File getTrashbin() {
+        return trashbin;
+    }
+
+    public File getTrash(String name){
+        return new File(trashbin,name);
+    }
+
+    public File getQuestFile(String name, String type) {
+        File folder = switch (type) {
+            case "global" -> getGlobalQuests();
+            case "daily" -> getDailyQuests();
+            case "weekly" -> getWeeklyQuests();
+            case "monthly" -> getMonthlyQuests();
+            default -> throw new IllegalArgumentException("Unknown quest type: " + type);
+        };
+        String fileName = name.endsWith(".json") ? name : name + ".json";
+        return new File(folder, fileName);
     }
 }
