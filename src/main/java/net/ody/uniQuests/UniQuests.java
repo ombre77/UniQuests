@@ -8,6 +8,7 @@ import net.ody.uniQuests.listeners.QuestProgressListener;
 import net.ody.uniQuests.listeners.QuestsMenuListener;
 import net.ody.uniQuests.listeners.SeeQuestsMenuListener;
 import net.ody.uniQuests.modules.*;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -53,6 +54,14 @@ public final class UniQuests extends JavaPlugin {
         //update quests
         QuestHandler.disableOutTime(this);
         QuestHandler.deleteOutTime(this);
+
+        //enable hour check
+        Bukkit.getScheduler().runTaskTimer(this,()->{
+            logger.info("Quest check...");
+            QuestHandler.disableOutTime(this);
+            QuestHandler.deleteOutTime(this);
+            logger.info("Quest checked! see ya in an hour");
+        },0L,72000L);
 
         logger.info("UniQuests loaded!");
     }

@@ -422,29 +422,4 @@ public class QuestHandler {
             }
         }
     }
-
-    public static void unDisableQuestFile(String name,UniQuests plugin){
-        UniQuestsFileManager manager=plugin.fileManager;
-        File file = plugin.config.trashBin
-                ? manager.getTrash(name)
-                : manager.findDisabledQuestFile(name);
-
-        String rawName=file.getName().replace(".disabled","");
-        int dotIndex = rawName.lastIndexOf('.');
-        String extension = (dotIndex == -1) ? "" : rawName.substring(dotIndex + 1);
-
-        File parent=switch(extension){
-            case "daily" -> manager.getDailyQuests();
-            case "weekly" -> manager.getWeeklyQuests();
-            case "monthly" -> manager.getMonthlyQuests();
-            default -> manager.getGlobalQuests();
-        };
-
-        File newFile=new File(parent,file.getName().replace(".disabled","").replace("."+extension,""));
-        try {
-            Files.move(file.toPath(), newFile.toPath());
-        } catch (IOException e) {
-            plugin.logger.warning("Failed to unDisabled quest file...");
-        }
-    }
 }
