@@ -12,6 +12,7 @@ public class Configuration {
     public int trashDelay;
 
     public Configuration(UniQuests plugin){
+        plugin.saveDefaultConfig();
         FileConfiguration configFile=plugin.getConfig();
 
         disabling=configFile.getBoolean("enable-disabling");

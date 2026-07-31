@@ -23,6 +23,7 @@ public class ReloadCommand implements CommandExecutor {
         plugin.playersData=loader.loadPlayersData();
         plugin.playersStats=loader.loadPlayersStats();
         QuestHandler.disableOutTime(plugin);
+        QuestHandler.deleteOutTime(plugin);
         return true;
     }
 }

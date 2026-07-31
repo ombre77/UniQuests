@@ -13,11 +13,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -320,20 +322,47 @@ public class QuestHandler {
         }
     }
 
+    public static String getQuestFileType(File file){
+        return switch (file.getParentFile().getName()){
+            case "globals" -> "global";
+            case "daily" -> "daily";
+            case "weekly" -> "weekly";
+            case "monthly" -> "monthly";
+            default -> "unknow";
+        };
+    }
+
     public static void disableQuestFile(Quest quest, UniQuests plugin) {
         if (!plugin.config.disabling) return;
 
         UniQuestsFileManager fileManager = plugin.fileManager;
         File file = fileManager.getQuestFile(quest.file_name, quest.type);
-        if (!file.exists() || file.getName().endsWith(".disabled")) {
+        if (!file.exists() || file.getName().endsWith(".disabled")) { //if alr disabled
             return;
         }
-        File newFile = new File(file.getParentFile(), file.getName() + ".disabled");
+
+        File newFile = new File(file.getParentFile(), file.getName() + "."+getQuestFileType(file)+".disabled");
         try {
             Files.move(file.toPath(), newFile.toPath());
+            newFile.setLastModified(System.currentTimeMillis());
             plugin.logger.info("Disabling file " + file.getName());
+            if (plugin.config.trashBin){
+                moveToTrashBin(newFile,plugin);
+            }
         } catch (IOException e) {
             plugin.logger.warning("Failed to disable quest file '" + file.getName() + "': " + e.getMessage());
+        }
+    }
+
+    public static void moveToTrashBin(File file, UniQuests plugin) {
+        UniQuestsFileManager fileManager = plugin.fileManager;
+        File trashFile = fileManager.getTrash(file.getName());
+        try {
+            Files.move(file.toPath(), trashFile.toPath());
+            trashFile.setLastModified(System.currentTimeMillis());
+            plugin.logger.info("Moved quest file to trash: " + file.getName());
+        } catch (IOException e) {
+            plugin.logger.warning("Failed to move quest file '" + file.getName() + "' to trash: " + e.getMessage());
         }
     }
 
@@ -341,8 +370,81 @@ public class QuestHandler {
         if (!plugin.config.deleting) return;
 
         UniQuestsFileManager manager=plugin.fileManager;
-        if (plugin.config.trashBin){
-            manager.getTrash(fileName).delete();
+        File file = plugin.config.trashBin
+                ? manager.getTrash(fileName)
+                : manager.findDisabledQuestFile(fileName);
+
+        if (file == null || !file.exists()) {
+            plugin.logger.warning("Could not find quest file to delete: " + fileName);
+            return;
+        }
+
+        if (file.delete()) {
+            plugin.logger.info("Deleted quest file " + file.getName());
+        } else {
+            plugin.logger.warning("Failed to delete quest file '" + file.getName() + "'");
+        }
+    }
+
+
+    public static void deleteOutTime(UniQuests plugin) {
+        if (!plugin.config.deleting) return;
+
+        UniQuestsFileManager manager = plugin.fileManager;
+        long dayMillis = 24L * 60 * 60 * 1000; //24h 60mn 60s 1kms
+        long now = System.currentTimeMillis();
+
+        for (File folder : manager.getQuestTypeFolders()) {
+            File[] disabledFiles = folder.listFiles((dir, name) -> name.endsWith(".disabled"));
+            if (disabledFiles == null) continue;
+
+            for (File file : disabledFiles) {
+                long ageDays = (now - file.lastModified()) / dayMillis;
+                if (plugin.config.trashBin) {
+                    if (ageDays >= plugin.config.trashDelay) {
+                        moveToTrashBin(file, plugin);
+                    }
+                } else if (ageDays >= plugin.config.deletingDelay) {
+                    deleteQuestFile(file.getName(), plugin);
+                }
+            }
+        }
+
+        if (plugin.config.trashBin) {
+            File[] trashedFiles = manager.getTrashbin().listFiles();
+            if (trashedFiles == null) return;
+
+            for (File file : trashedFiles) {
+                long ageDays = (now - file.lastModified()) / dayMillis;
+                if (ageDays >= plugin.config.deletingDelay) {
+                    deleteQuestFile(file.getName(), plugin);
+                }
+            }
+        }
+    }
+
+    public static void unDisableQuestFile(String name,UniQuests plugin){
+        UniQuestsFileManager manager=plugin.fileManager;
+        File file = plugin.config.trashBin
+                ? manager.getTrash(name)
+                : manager.findDisabledQuestFile(name);
+
+        String rawName=file.getName().replace(".disabled","");
+        int dotIndex = rawName.lastIndexOf('.');
+        String extension = (dotIndex == -1) ? "" : rawName.substring(dotIndex + 1);
+
+        File parent=switch(extension){
+            case "daily" -> manager.getDailyQuests();
+            case "weekly" -> manager.getWeeklyQuests();
+            case "monthly" -> manager.getMonthlyQuests();
+            default -> manager.getGlobalQuests();
+        };
+
+        File newFile=new File(parent,file.getName().replace(".disabled","").replace("."+extension,""));
+        try {
+            Files.move(file.toPath(), newFile.toPath());
+        } catch (IOException e) {
+            plugin.logger.warning("Failed to unDisabled quest file...");
         }
     }
 }

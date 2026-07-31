@@ -156,4 +156,37 @@ public class UniQuestsFileManager {
         String fileName = name.endsWith(".json") ? name : name + ".json";
         return new File(folder, fileName);
     }
+
+    public File[] getQuestTypeFolders() {
+        return new File[]{getDailyQuests(), getWeeklyQuests(), getMonthlyQuests(), getGlobalQuests()};
+    }
+
+    public File findDisabledQuestFile(String name) {
+        String baseName = normalizeToBaseName(name);
+        for (File folder : getQuestTypeFolders()) {
+            File[] matches = folder.listFiles((dir, fileName) ->
+                    fileName.startsWith(baseName + ".") && fileName.endsWith(".disabled"));
+            if (matches != null && matches.length > 0) {
+                return matches[0];
+            }
+        }
+        return null;
+    }
+    
+    private String normalizeToBaseName(String name) {
+        String n = name;
+        if (n.endsWith(".disabled")) {
+            n = n.substring(0, n.length() - ".disabled".length());
+        }
+        for (String type : new String[]{"daily", "weekly", "monthly", "global"}) {
+            if (n.endsWith("." + type)) {
+                n = n.substring(0, n.length() - (type.length() + 1));
+                break;
+            }
+        }
+        if (n.endsWith(".json")) {
+            n = n.substring(0, n.length() - ".json".length());
+        }
+        return n;
+    }
 }

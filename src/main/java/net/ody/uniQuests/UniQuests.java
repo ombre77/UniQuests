@@ -2,6 +2,7 @@ package net.ody.uniQuests;
 
 import net.ody.uniQuests.commands.QuestsCommand;
 import net.ody.uniQuests.commands.ReloadCommand;
+import net.ody.uniQuests.handlers.QuestHandler;
 import net.ody.uniQuests.listeners.QuestDetailMenuListener;
 import net.ody.uniQuests.listeners.QuestProgressListener;
 import net.ody.uniQuests.listeners.QuestsMenuListener;
@@ -49,12 +50,24 @@ public final class UniQuests extends JavaPlugin {
         //load settings
         config=new Configuration(this);
 
+        //update quests
+        QuestHandler.disableOutTime(this);
+        QuestHandler.deleteOutTime(this);
+
         logger.info("UniQuests loaded!");
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        logger.warning("hey dont worry about the horrible log incoming,");
+        logger.warning("im just too lazy to make it good :)");
+        logger.info("disabling uniquests");
+        logger.info("saving players data");
+        questLoader.savePlayersData(playersData);
+        logger.info("updating quests");
+        QuestHandler.disableOutTime(this);
+        QuestHandler.deleteOutTime(this);
+        logger.info("uniquests deloaded");
     }
 
     public PlayerData getOrCreatePlayerData(Player player) {
