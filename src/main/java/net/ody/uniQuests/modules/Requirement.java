@@ -1,6 +1,6 @@
 package net.ody.uniQuests.modules;
 
-public class Requirement {
+public class Requirement extends TableEntry{
     public String type;
     public String item;
     public String mob;
@@ -8,3 +8,5 @@ public class Requirement {
     public String quest_id;
     public int amount;
 }
+
+//why r u searching here?

@@ -17,6 +17,7 @@ public class UniQuestsFileManager {
     private File weeklyQuests;
     private File monthlyQuests;
     private File trashbin;
+    private File tables;
 
     private File playersData;
     private File playersStats;
@@ -75,6 +76,7 @@ public class UniQuestsFileManager {
         weeklyQuests=assureFolder("weekly",questsFolder);
         monthlyQuests=assureFolder("monthly",questsFolder);
         trashbin=assureFolder("TrashBin",dataFolder);
+        tables=assureFolder("tables",dataFolder);
 
 
         //Files

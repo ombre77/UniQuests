@@ -367,6 +367,76 @@
         .chip.item{ color:var(--blue-bright); border-color:#2c4d75; }
         .chip.exp{ color:var(--violet-bright); border-color:#453a7d; }
         .chip.coin{ color:#ffd27a; border-color:#6b5525; }
+        .chip.table{ color:#7fe0c4; border-color:#2c5d4d; }
+
+        /* ---------- mode toggle ---------- */
+        .mode-toggle{
+          display:flex;
+          background:var(--bg-inset);
+          border:1px solid var(--border-soft);
+          border-radius:9px;
+          padding:3px;
+          gap:2px;
+        }
+        .mode-toggle button{
+          border:none;
+          background:transparent;
+          color:var(--text-muted);
+          font-size:12.5px;
+          font-weight:600;
+          padding:6px 13px;
+          border-radius:7px;
+          letter-spacing:.02em;
+          transition:background .15s, color .15s;
+        }
+        .mode-toggle button.active{
+          background:linear-gradient(135deg,#8b7cf6 0%,#4fa4f7 100%);
+          color:#0a0b14;
+        }
+        .mode-toggle button:not(.active):hover{ color:var(--text); }
+
+        /* ---------- segmented control (table type) ---------- */
+        .segmented{
+          display:flex;
+          background:var(--bg-inset);
+          border:1px solid var(--border-soft);
+          border-radius:9px;
+          padding:3px;
+          gap:2px;
+        }
+        .segmented button{
+          flex:1;
+          border:none;
+          background:transparent;
+          color:var(--text-muted);
+          font-size:11px;
+          font-weight:600;
+          padding:8px 4px;
+          border-radius:7px;
+          letter-spacing:.01em;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:4px;
+          transition:background .15s, color .15s, box-shadow .15s;
+        }
+        .segmented button:not(.active):hover{ color:var(--text); background:rgba(255,255,255,.04); }
+        .segmented button svg{ width:13px; height:13px; flex:none; }
+        .segmented button[data-value="reward"].active{
+          background:linear-gradient(135deg,#8b7cf6 0%,#4fa4f7 100%);
+          color:#0a0b14;
+          box-shadow:0 2px 12px rgba(139,124,246,.4);
+        }
+        .segmented button[data-value="price"].active{
+          background:linear-gradient(135deg,#ffd27a 0%,#f0a552 100%);
+          color:#0a0b14;
+          box-shadow:0 2px 12px rgba(240,165,82,.4);
+        }
+        .segmented button[data-value="requirement"].active{
+          background:linear-gradient(135deg,#7fe0c4 0%,#4fb896 100%);
+          color:#0a0b14;
+          box-shadow:0 2px 12px rgba(79,184,150,.4);
+        }
 
         .danger-zone{
           display:flex; justify-content:flex-end; margin-top:4px;
@@ -446,23 +516,27 @@
         <h1>QuestCreator</h1>
         <span>UniQuests editor</span>
     </div>
+    <div class="file-field" id="createdField">
+        <label for="createdInput">Created (dd/MM/yy)</label>
+        <input id="createdInput" type="text" placeholder="18/07/26" maxlength="8">
+    </div>
     <a class="btn ghost icon-btn" id="githubLink" href="https://github.com/ombre77/UniQuests" target="_blank" rel="noopener noreferrer" title="View repo on GitHub" aria-label="View repo on GitHub">
         <svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
         GitHub
     </a>
     <a class="btn ghost" id="readmeLink" href="https://github.com/ombre77/UniQuests/blob/master/README.md" target="_blank" rel="noopener noreferrer">README ↗</a>
-    <div class="file-field">
-        <label for="createdInput">Created (dd/MM/yy)</label>
-        <input id="createdInput" type="text" placeholder="18/07/26" maxlength="8">
+    <div class="mode-toggle" id="modeToggle">
+        <button type="button" id="modeQuestsBtn" class="active">Quests</button>
+        <button type="button" id="modeTablesBtn">Tables</button>
     </div>
-    <button class="btn ghost" id="importBtn">Edit JSON</button>
+    <button class="btn ghost" id="importBtn">Import JSON</button>
     <input type="file" id="importInput" accept="application/json,.json">
     <button class="btn gold" id="exportBtn">Export JSON</button>
 </header>
 
 <div class="layout">
 
-    <aside class="sidebar">
+    <aside class="sidebar" id="questSidebar">
         <div class="sidebar-head">
             <h2>Quests</h2>
             <span class="count" id="questTotal" style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)"></span>
@@ -480,6 +554,44 @@
                 <input id="newQuestIdInput" type="text" placeholder="brand_new_quest" style="width:100%;">
             </div>
             <button class="btn gold" id="addQuestBtn">+ New quest</button>
+        </div>
+    </aside>
+
+    <aside class="sidebar" id="tableSidebar" style="display:none;">
+        <div class="sidebar-head">
+            <h2>Table</h2>
+        </div>
+        <div class="meta-block">
+            <div class="file-field">
+                <label for="tableFileNameInput">File name</label>
+                <input id="tableFileNameInput" type="text" placeholder="rewards/common_rewards.json">
+            </div>
+        </div>
+        <div class="meta-block" style="border-bottom:none;">
+            <div class="file-field" style="margin-bottom:8px;">
+                <label for="tableIdInput">Table ID</label>
+                <input id="tableIdInput" type="text" placeholder="common_rewards">
+            </div>
+            <div class="field">
+                <label for="tableTypeSegmented">Table type</label>
+                <div class="segmented" id="tableTypeSegmented" role="group" aria-label="Table type">
+                    <button type="button" data-value="reward" class="active">
+                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1 9.8 5.6 14.8 6l-3.9 3.1L12 14 8 11.2 4 14l1.1-4.9L1.2 6l5-.4L8 1Z"/></svg>
+                        Reward
+                    </button>
+                    <button type="button" data-value="price">
+                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0a1 1 0 0 1 1 1v1.06c1.85.32 3 1.53 3 2.94a1 1 0 1 1-2 0c0-.5-.63-1.14-1.75-1.36v3.06c1.98.4 3.75 1.36 3.75 3.4 0 1.85-1.5 3.15-3.75 3.5V15a1 1 0 1 1-2 0v-1.02c-2.02-.3-3.25-1.5-3.25-2.98a1 1 0 1 1 2 0c0 .5.55 1.06 1.25 1.28V8.9c-1.9-.42-3.5-1.4-3.5-3.36 0-1.8 1.42-3.02 3.5-3.36V1a1 1 0 0 1 1-1Zm-1 4.06c-.94.24-1.5.78-1.5 1.48 0 .68.5 1.1 1.5 1.36V4.06Zm2 5.24v2.82c1.06-.24 1.75-.82 1.75-1.5 0-.72-.6-1.1-1.75-1.32Z"/></svg>
+                        Price
+                    </button>
+                    <button type="button" data-value="requirement">
+                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.5 2.5 6 10l-3.5-3.5-1.4 1.4L6 12.8l8.9-8.9-1.4-1.4Z" transform="translate(0.3,0)"/><path d="M2 13h12v1.4H2z" opacity=".55"/></svg>
+                        Requirement
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-foot">
+            <button class="btn danger" id="resetTableBtn">Clear table</button>
         </div>
     </aside>
 
@@ -506,9 +618,27 @@
       "use strict";
 
       /* ---------------- state ---------------- */
+      let mode = 'quests'; // 'quests' | 'tables'
       let data = { created: todayStr(), quests: {} };
       let activeId = null;
       let fileName = "new_quests.json";
+
+      let tableData = blankTableData();
+      let tableFileName = "new_table.json";
+
+      function blankTableData(){
+        return { id:"", table_type:"reward", entries:[] };
+      }
+
+      function normalizeTableData(parsed){
+        if (typeof parsed !== 'object' || parsed === null) throw new Error("Root is not an object");
+        const validTypes = ['reward', 'price', 'requirement'];
+        return {
+          id: typeof parsed.id === 'string' ? parsed.id : "",
+          table_type: validTypes.includes(parsed.table_type) ? parsed.table_type : 'reward',
+          entries: Array.isArray(parsed.entries) ? parsed.entries : [],
+        };
+      }
 
       function todayStr(){
         const d = new Date();
@@ -596,6 +726,14 @@
       const editor           = document.getElementById('editor');
       const jsonOut          = document.getElementById('jsonOut');
       const importInput      = document.getElementById('importInput');
+      const questSidebar     = document.getElementById('questSidebar');
+      const tableSidebar     = document.getElementById('tableSidebar');
+      const createdField     = document.getElementById('createdField');
+      const modeQuestsBtn    = document.getElementById('modeQuestsBtn');
+      const modeTablesBtn    = document.getElementById('modeTablesBtn');
+      const tableFileNameInput = document.getElementById('tableFileNameInput');
+      const tableIdInput     = document.getElementById('tableIdInput');
+      const tableTypeSegmented = document.getElementById('tableTypeSegmented');
 
       createdInput.addEventListener('input', () => { data.created = createdInput.value; renderJson(); });
       fileNameInput.addEventListener('input', () => { fileName = fileNameInput.value.trim() || "new_quests.json"; });
@@ -617,12 +755,21 @@
         const reader = new FileReader();
         reader.onload = () => {
           try {
-            data = normalizeData(JSON.parse(reader.result));
-            fileName = file.name;
-            activeId = Object.keys(data.quests)[0] || null;
-            syncMetaInputs();
-            renderAll();
-            toast(`Imported ${Object.keys(data.quests).length} quest(s) from ${file.name}.`);
+            const parsedRaw = JSON.parse(reader.result);
+            if (mode === 'tables'){
+              tableData = normalizeTableData(parsedRaw);
+              tableFileName = file.name;
+              syncTableMetaInputs();
+              renderAll();
+              toast(`Imported table "${tableData.id || file.name}" (${tableData.entries.length} entries).`);
+            } else {
+              data = normalizeData(parsedRaw);
+              fileName = file.name;
+              activeId = Object.keys(data.quests)[0] || null;
+              syncMetaInputs();
+              renderAll();
+              toast(`Imported ${Object.keys(data.quests).length} quest(s) from ${file.name}.`);
+            }
           } catch (err){
             toast("Couldn't parse that file: " + err.message, true);
           }
@@ -632,20 +779,75 @@
       });
 
       document.getElementById('exportBtn').addEventListener('click', () => {
-        if (!fileName.toLowerCase().endsWith('.json')) fileName += '.json';
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = fileName;
-        document.body.appendChild(a); a.click(); a.remove();
-        URL.revokeObjectURL(url);
-        toast(`Exported ${fileName}`);
+        if (mode === 'tables'){
+          if (!tableFileName.toLowerCase().endsWith('.json')) tableFileName += '.json';
+          const blob = new Blob([JSON.stringify(tableData, null, 2)], { type:'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = tableFileName;
+          document.body.appendChild(a); a.click(); a.remove();
+          URL.revokeObjectURL(url);
+          toast(`Exported ${tableFileName}`);
+        } else {
+          if (!fileName.toLowerCase().endsWith('.json')) fileName += '.json';
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = fileName;
+          document.body.appendChild(a); a.click(); a.remove();
+          URL.revokeObjectURL(url);
+          toast(`Exported ${fileName}`);
+        }
       });
 
       function syncMetaInputs(){
         createdInput.value = data.created || "";
         fileNameInput.value = fileName;
       }
+
+      function syncTableMetaInputs(){
+        tableFileNameInput.value = tableFileName;
+        tableIdInput.value = tableData.id || "";
+        tableTypeSegmented.querySelectorAll('button').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.value === tableData.table_type);
+        });
+      }
+
+      tableFileNameInput.addEventListener('input', () => {
+        tableFileName = tableFileNameInput.value.trim() || "new_table.json";
+      });
+      tableIdInput.addEventListener('input', () => {
+        tableData.id = tableIdInput.value;
+        renderJson();
+      });
+      tableTypeSegmented.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-value]');
+        if (!btn || btn.classList.contains('active')) return;
+        tableData.table_type = btn.dataset.value;
+        // Entries carry fields specific to reward vs price shape (e.g. `chance`,
+        // `coin` type) — clear them on type switch rather than leave stale/invalid data.
+        tableData.entries = [];
+        syncTableMetaInputs();
+        renderAll();
+      });
+      document.getElementById('resetTableBtn').addEventListener('click', () => {
+        tableData = blankTableData();
+        syncTableMetaInputs();
+        renderAll();
+      });
+
+      function setMode(newMode){
+        mode = newMode;
+        const questsActive = mode === 'quests';
+        modeQuestsBtn.classList.toggle('active', questsActive);
+        modeTablesBtn.classList.toggle('active', !questsActive);
+        questSidebar.style.display = questsActive ? '' : 'none';
+        tableSidebar.style.display = questsActive ? 'none' : '';
+        createdField.style.display = questsActive ? '' : 'none';
+        renderAll();
+      }
+      modeQuestsBtn.addEventListener('click', () => setMode('quests'));
+      modeTablesBtn.addEventListener('click', () => setMode('tables'));
 
       /* ---------------- sidebar ---------------- */
       function renderQuestList(){
@@ -747,12 +949,14 @@
             {value:'killed', label:'Killed mob'},
             {value:'placed', label:'Placed block'},
             {value:'quest', label:'Completed quest'},
+            {value:'table', label:'Requirement table'},
           ],
           defaults:{
             have:{type:'have', item:'', amount:1},
             killed:{type:'killed', mob:'', amount:1},
             placed:{type:'placed', block:'', amount:1},
             quest:{type:'quest', quest_id:''},
+            table:{type:'table', table_id:''},
           },
           fieldsFor: reqFields,
         }));
@@ -763,10 +967,12 @@
           typeOptions:[
             {value:'item', label:'Item'},
             {value:'exp', label:'Experience'},
+            {value:'table', label:'Price table'},
           ],
           defaults:{
             item:{type:'item', item:'', amount:1},
             exp:{type:'exp', exp:'level', amount:1},
+            table:{type:'table', table_id:''},
           },
           fieldsFor: priceFields,
         }));
@@ -778,14 +984,80 @@
             {value:'item', label:'Item'},
             {value:'exp', label:'Experience'},
             {value:'coin', label:'Event coin'},
+            {value:'table', label:'Reward table'},
           ],
           defaults:{
             item:{type:'item', item:'', amount:1},
             exp:{type:'exp', exp:'points', amount:1},
             coin:{type:'coin', amount:1},
+            table:{type:'table', table_id:''},
           },
           fieldsFor: rewardFields,
           allowChance:true,
+        }));
+      }
+
+      function tableEntryFields(entry){
+        // Table entries reuse requirement/reward/price field shapes, but never
+        // nest a 'table' type inside a table.
+        if (tableData.table_type === 'price') return priceFields(entry);
+        if (tableData.table_type === 'requirement') return reqFields(entry);
+        return rewardFields(entry);
+      }
+
+      function renderTableEditor(){
+        editor.innerHTML = "";
+        const type = tableData.table_type;
+
+        let title, typeOptions, defaults, allowChance;
+        if (type === 'price'){
+          title = "Price table entries";
+          typeOptions = [
+            {value:'item', label:'Item'},
+            {value:'exp', label:'Experience'},
+          ];
+          defaults = {
+            item:{type:'item', item:'', amount:1},
+            exp:{type:'exp', exp:'level', amount:1},
+          };
+          allowChance = false;
+        } else if (type === 'requirement'){
+          title = "Requirement table entries";
+          typeOptions = [
+            {value:'have', label:'Have item'},
+            {value:'killed', label:'Killed mob'},
+            {value:'placed', label:'Placed block'},
+            {value:'quest', label:'Completed quest'},
+          ];
+          defaults = {
+            have:{type:'have', item:'', amount:1},
+            killed:{type:'killed', mob:'', amount:1},
+            placed:{type:'placed', block:'', amount:1},
+            quest:{type:'quest', quest_id:''},
+          };
+          allowChance = false;
+        } else {
+          title = "Reward table entries";
+          typeOptions = [
+            {value:'item', label:'Item'},
+            {value:'exp', label:'Experience'},
+            {value:'coin', label:'Event coin'},
+          ];
+          defaults = {
+            item:{type:'item', item:'', amount:1},
+            exp:{type:'exp', exp:'points', amount:1},
+            coin:{type:'coin', amount:1},
+          };
+          allowChance = true;
+        }
+
+        editor.appendChild(buildListSection({
+          title,
+          list: tableData.entries,
+          typeOptions,
+          defaults,
+          fieldsFor: tableEntryFields,
+          allowChance,
         }));
       }
 
@@ -813,6 +1085,9 @@
           case 'quest': return [
             {key:'quest_id', label:'Quest ID', type:'text', placeholder:'brand_new_quest'},
           ];
+          case 'table': return [
+            {key:'table_id', label:'Table ID', type:'text', placeholder:'starter_requirements'},
+          ];
           default: return [];
         }
       }
@@ -825,6 +1100,9 @@
           case 'exp': return [
             {key:'exp', label:'Exp type', type:'select', options:['level','points']},
             {key:'amount', label:'Amount', type:'number', placeholder:'1'},
+          ];
+          case 'table': return [
+            {key:'table_id', label:'Table ID', type:'text', placeholder:'standard_fees'},
           ];
           default: return [];
         }
@@ -841,6 +1119,9 @@
           ];
           case 'coin': return [
             {key:'amount', label:'Amount', type:'number', placeholder:'5'},
+          ];
+          case 'table': return [
+            {key:'table_id', label:'Table ID', type:'text', placeholder:'common_rewards'},
           ];
           default: return [];
         }
@@ -956,25 +1237,35 @@
       const jsonStatus = document.getElementById('jsonStatus');
 
       function renderJson(){
-        jsonOut.value = JSON.stringify(data, null, 2);
+        jsonOut.value = JSON.stringify(mode === 'tables' ? tableData : data, null, 2);
         jsonStatus.textContent = "Valid JSON — edits here apply live.";
         jsonStatus.classList.remove('err');
       }
 
+      function applyParsedJson(parsedRaw){
+        if (mode === 'tables'){
+          tableData = normalizeTableData(parsedRaw);
+          syncTableMetaInputs();
+          renderTableEditor();
+        } else {
+          data = normalizeData(parsedRaw);
+          if (!data.quests[activeId]) activeId = Object.keys(data.quests)[0] || null;
+          syncMetaInputs();
+          renderQuestList();
+          renderEditor();
+        }
+      }
+
       const applyJsonFromTextarea = debounce(() => {
-        let parsed;
+        let parsedRaw;
         try {
-          parsed = normalizeData(JSON.parse(jsonOut.value));
+          parsedRaw = JSON.parse(jsonOut.value);
+          applyParsedJson(parsedRaw);
         } catch (err){
           jsonStatus.textContent = "Invalid JSON — fix the syntax to apply changes: " + err.message;
           jsonStatus.classList.add('err');
           return;
         }
-        data = parsed;
-        if (!data.quests[activeId]) activeId = Object.keys(data.quests)[0] || null;
-        syncMetaInputs();
-        renderQuestList();
-        renderEditor();
         jsonStatus.textContent = "Valid JSON — edits here apply live.";
         jsonStatus.classList.remove('err');
       }, 400);
@@ -982,11 +1273,7 @@
       jsonOut.addEventListener('input', applyJsonFromTextarea);
       jsonOut.addEventListener('blur', () => {
         try {
-          data = normalizeData(JSON.parse(jsonOut.value));
-          if (!data.quests[activeId]) activeId = Object.keys(data.quests)[0] || null;
-          syncMetaInputs();
-          renderQuestList();
-          renderEditor();
+          applyParsedJson(JSON.parse(jsonOut.value));
           renderJson();
         } catch (err){
           jsonStatus.textContent = "Invalid JSON — fix the syntax to apply changes: " + err.message;
@@ -995,8 +1282,12 @@
       });
 
       function renderAll(){
-        renderQuestList();
-        renderEditor();
+        if (mode === 'tables'){
+          renderTableEditor();
+        } else {
+          renderQuestList();
+          renderEditor();
+        }
         renderJson();
       }
 
@@ -1007,6 +1298,7 @@
 
       /* ---------------- init ---------------- */
       syncMetaInputs();
+      syncTableMetaInputs();
       renderAll();
     })();
 </script>
