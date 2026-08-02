@@ -139,6 +139,11 @@ public class UniQuestsFileManager {
         return monthlyQuests;
     }
 
+    public File getTables() {
+        checkForNull(tables);
+        return tables;
+    }
+
     public File getTrashbin() {
         return trashbin;
     }

@@ -6,4 +6,5 @@ public class RewardEntry extends TableEntry{
     public int amount;
     public Integer chance;
     public String exp;
+    public String table_id;
 }

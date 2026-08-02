@@ -252,7 +252,7 @@ public class QuestHandler {
         return completed;
     }
 
-    public static void giveRewards(Quest quest,Player player){
+    public static void giveRewards(Quest quest,Player player,UniQuests plugin){
         for (RewardEntry reward:quest.reward){
             if (reward.chance!=null){
                 int randomInt = ThreadLocalRandom.current().nextInt(1, 101);
@@ -293,10 +293,15 @@ public class QuestHandler {
                     player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
                             .append(Component.text(reward.amount+" event coins",NamedTextColor.GOLD)));
                 }
+                case "table"->{
+                    Table table=plugin.tableLoader.getTableById(reward.table_id);
+
+                }
                 default -> player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.type!=Reward.VALID_TYPE");
             }
         }
     }
+
 
     public static boolean isQuestInTime(Quest quest) {
         if (quest.type.equals("global")) {

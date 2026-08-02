@@ -52,7 +52,7 @@ public class QuestDetailMenuListener implements Listener {
             data.addCompleted(quest, quest.type,plugin);
             plugin.questLoader.savePlayersData(plugin.playersData);
             player.sendMessage(Component.text("Quest validated, ggs!", NamedTextColor.GREEN));
-            QuestHandler.giveRewards(quest,player);
+            QuestHandler.giveRewards(quest,player,plugin);
             QuestDetailMenu.open(player, plugin, quest);
             return;
         }

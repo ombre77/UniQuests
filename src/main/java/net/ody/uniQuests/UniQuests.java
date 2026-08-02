@@ -12,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
@@ -22,8 +23,10 @@ public final class UniQuests extends JavaPlugin {
     public UniQuestsFileManager fileManager=new UniQuestsFileManager(this);
     public String site="https://github.com/ombre77/UniQuests";
     public final QuestLoader questLoader= new QuestLoader(fileManager,logger);
+    public final TableLoader tableLoader= new TableLoader(this);
 
     public Map<String, Quest> quests;
+    public List<Table> tables;
     public Map<String, PlayerData> playersData;
     public Map<String, PlayerStats> playersStats;
 
@@ -42,6 +45,9 @@ public final class UniQuests extends JavaPlugin {
 
         //setup files and folders
         fileManager.setup();
+
+        //load tables
+        tables=tableLoader.loadAllTables();
 
         //load quests,player data and stats
         quests=questLoader.loadAllQuests();
