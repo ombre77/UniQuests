@@ -5,4 +5,5 @@ public class Price extends TableEntry{
     public String item;
     public int amount;
     public String exp;
+    public String table_id;
 }

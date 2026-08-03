@@ -114,4 +114,60 @@ public class TableLoader {
         }
         return filtered.getFirst();
     }
+
+    public Quest handleQuestTables(Quest quest,UniQuests plugin){
+
+        //check requirement
+        List<Requirement> resolvedRequirements = new ArrayList<>();
+        for (Requirement requirement:quest.requirements){
+            if (!requirement.type.equals("table")) {
+                resolvedRequirements.add(requirement);
+                continue;
+            };
+
+            Table table=getTableById(requirement.table_id);
+            if (table==null)continue;
+
+            for (TableEntry entry : table.entries){
+                resolvedRequirements.add((Requirement) entry);
+            }
+        }
+        quest.requirements=resolvedRequirements;
+
+        //check price
+        List<Price> resolvedPrices = new ArrayList<>();
+        for (Price price: quest.price){
+            if (!price.type.equals("table")) {
+                resolvedPrices.add(price);
+                continue;
+            };
+
+            Table table=getTableById(price.table_id);
+            if (table==null)continue;
+
+            for (TableEntry entry : table.entries){
+                resolvedPrices.add((Price) entry);
+            }
+        }
+        quest.price=resolvedPrices;
+
+        //check rewards
+        List<RewardEntry> resolvedRewards = new ArrayList<>();
+        for (RewardEntry reward:quest.reward){
+            if (!reward.type.equals("table")) {
+                resolvedRewards.add(reward);
+                continue;
+            };
+
+            Table table=getTableById(reward.table_id);
+            if (table==null)continue;
+
+            for (TableEntry entry : table.entries){
+                resolvedRewards.add((RewardEntry) entry);
+            }
+        }
+        quest.reward=resolvedRewards;
+
+        return quest;
+    }
 }

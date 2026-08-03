@@ -3,6 +3,7 @@ package net.ody.uniQuests.modules;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import net.ody.uniQuests.UniQuests;
 import net.ody.uniQuests.UniQuestsFileManager;
 import net.ody.uniQuests.utils.DateUtils;
 
@@ -27,7 +28,7 @@ public class QuestLoader {
         this.logger = logger;
     }
 
-    public Map<String,Quest> loadAllQuests(){
+    public Map<String,Quest> loadAllQuests(UniQuests plugin){
         Map<String, Quest> allQuests = new LinkedHashMap<>();
         Type fileType = new TypeToken<QuestFile>() {}.getType();
 
@@ -56,16 +57,20 @@ public class QuestLoader {
                             continue;
                         }
                         for (Map.Entry<String,Quest> questEntry : questFile.quests.entrySet()) {
+                            // create quest
                             Quest quest = questEntry.getValue();
+                            // set type, file name, date of creation, deletion and id
                             quest.type = type;
                             quest.file_name=file.getName();
                             quest.created = questFile.created;
                             int expireDelay = getExpireDelay(quest);
                             quest.expire = DateUtils.addDays(quest.created, expireDelay);
                             quest.id = questEntry.getKey();
+                            // set all requirements quest id
                             for (Requirement requirement : quest.requirements){
                                 requirement.quest_id = quest.id;
                             }
+                            quest=plugin.tableLoader.handleQuestTables(quest,plugin);
                         }
                         allQuests.putAll(questFile.quests);
                         loaded += questFile.quests.size();

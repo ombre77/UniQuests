@@ -293,10 +293,6 @@ public class QuestHandler {
                     player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
                             .append(Component.text(reward.amount+" event coins",NamedTextColor.GOLD)));
                 }
-                case "table"->{
-                    Table table=plugin.tableLoader.getTableById(reward.table_id);
-
-                }
                 default -> player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.type!=Reward.VALID_TYPE");
             }
         }

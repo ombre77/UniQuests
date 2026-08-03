@@ -50,7 +50,7 @@ public final class UniQuests extends JavaPlugin {
         tables=tableLoader.loadAllTables();
 
         //load quests,player data and stats
-        quests=questLoader.loadAllQuests();
+        quests=questLoader.loadAllQuests(this);
         playersData=questLoader.loadPlayersData();
         playersStats=questLoader.loadPlayersStats();
 

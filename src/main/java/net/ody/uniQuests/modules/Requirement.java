@@ -7,6 +7,7 @@ public class Requirement extends TableEntry{
     public String block;
     public String quest_id;
     public int amount;
+    public String table_id;
 }
 
 //why r u searching here?
