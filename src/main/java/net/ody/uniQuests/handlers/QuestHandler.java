@@ -95,14 +95,14 @@ public class QuestHandler {
         String strAmount;
         if (requirement.type.equals("have") && inCompletion){
             int currentAmount = countItems(player, requirement.item);
-            strAmount = currentAmount + "/" + requirement.amount;
+            strAmount = Math.min(currentAmount,requirement.amount) + "/" + requirement.amount;
         }
         else if (inCompletion){
             ActiveQuest activeQuest =data.getActive(requirement.quest_id);
             Quest quest=plugin.quests.get(activeQuest.quest_id);
             String requirementId= String.valueOf(quest.requirements.indexOf(requirement));
             int currentProgress=activeQuest.progress.get(requirementId);
-            strAmount=currentProgress+"/"+requirement.amount;
+            strAmount=Math.min(currentProgress,requirement.amount)+"/"+requirement.amount;
         } else{
             strAmount=""+requirement.amount;
         }
@@ -150,7 +150,9 @@ public class QuestHandler {
             line=" - "+reward.amount+" "+prettify(reward.item);
         } else if (rewardType.equals("exp")) {
             line=" - "+reward.amount+" "+reward.exp+" of exp";
-        } else {
+        } else if (rewardType.contains("coin")) {
+            line=" - "+reward.amount+" event coins";
+        }else {
             line=" - error.unrecognized_reward="+rewardType;
         }
 
@@ -187,6 +189,7 @@ public class QuestHandler {
     }
 
     public static boolean requirementCompleted(Requirement requirement, Player player, UniQuests plugin){
+
         if (requirement.type.equals("have")){
             return countItems(player, requirement.item) >= requirement.amount;
         }
@@ -235,66 +238,69 @@ public class QuestHandler {
             return false;
         }
 
-        boolean completed=true;
         //requirements check
         for (Requirement requirement:quest.requirements){
             if (!requirementCompleted(requirement,player,plugin)){
-                completed=false;
+                 return false;
             }
         }
         //cost check
         for (Price price:quest.price){
             if (!priceCompleted(price,player)){
-                completed=false;
+                return false;
             }
         }
 
-        return completed;
+        return true;
     }
 
-    public static void giveRewards(Quest quest,Player player,UniQuests plugin){
+    public static void giveRewards(Quest quest,Player player){
         for (RewardEntry reward:quest.reward){
-            if (reward.chance!=null){
-                int randomInt = ThreadLocalRandom.current().nextInt(1, 101);
-                if (reward.chance<randomInt){
-                    continue;
-                }
+            giveReward(player,reward);
+        }
+    }
+
+    public static void giveReward(Player player, RewardEntry reward){
+        if (reward.chance!=null){
+            int randomInt = ThreadLocalRandom.current().nextInt(1, 101);
+            if (reward.chance<randomInt){
+                return;
             }
-            switch (reward.type){
-                case "item" -> {
-                    Material rewardMat=Material.getMaterial(reward.item.toUpperCase(Locale.ROOT));
-                    if (rewardMat==null){
-                        player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.item!=Item.VALID_ITEM");
-                        continue;
-                    }
-                    ItemStack rewardItem = new ItemStack(rewardMat,reward.amount);
-                    player.give(rewardItem);
-                    player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
-                            .append(Component.text(reward.amount+" "+prettify(reward.item),NamedTextColor.GOLD)));
+        }
+        switch (reward.type){
+            case "item" -> {
+                Material rewardMat=Material.getMaterial(reward.item.toUpperCase(Locale.ROOT));
+                if (rewardMat==null){
+                    player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.item!=Item.VALID_ITEM");
+                    return;
                 }
-                case "exp" -> {
-                    if (reward.exp.equals("levels")||reward.exp.equals("level")){
-                        player.giveExpLevels(reward.amount);
-                    } else if (reward.exp.equals("points")) {
-                        player.giveExp(reward.amount);
-                    } else {
-                        player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.exp!=Exp.VALID_TYPE");
-                        continue;
-                    }
-                    player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
-                            .append(Component.text(reward.amount+" "+reward.exp+" of exp",NamedTextColor.GOLD)));
-                }
-                case "coins","coin" -> {
-                    ItemStack coin= Item.createItem(Material.HONEYCOMB,
-                            Component.text("EVENT COIN",NamedTextColor.GOLD),
-                            List.of(Component.text("/eventclaim to redeem!",NamedTextColor.DARK_GRAY)));
-                    coin.setAmount(reward.amount);
-                    player.give(coin);
-                    player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
-                            .append(Component.text(reward.amount+" event coins",NamedTextColor.GOLD)));
-                }
-                default -> player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.type!=Reward.VALID_TYPE");
+                ItemStack rewardItem = new ItemStack(rewardMat,reward.amount);
+                player.give(rewardItem);
+                player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
+                        .append(Component.text(reward.amount+" "+prettify(reward.item),NamedTextColor.GOLD)));
             }
+            case "exp" -> {
+                if (reward.exp.equals("levels")||reward.exp.equals("level")){
+                    player.giveExpLevels(reward.amount);
+                } else if (reward.exp.equals("points")) {
+                    player.giveExp(reward.amount);
+                } else {
+                    player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.exp!=Exp.VALID_TYPE");
+                    return;
+                }
+                player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
+                        .append(Component.text(reward.amount+" "+reward.exp+" of exp",NamedTextColor.GOLD)));
+            }
+            case "coins","coin" -> {
+                ItemStack coin= Item.createItem(Material.HONEYCOMB,
+                        Component.text("EVENT COIN",NamedTextColor.GOLD),
+                        List.of(Component.text("/eventclaim to redeem!",NamedTextColor.DARK_GRAY)));
+                coin.setAmount(reward.amount);
+                player.give(coin);
+                player.sendMessage(Component.text("You gained ",NamedTextColor.GREEN)
+                        .append(Component.text(reward.amount+" event coins",NamedTextColor.GOLD)));
+            }
+            default -> player.sendMessage("uniQuests.error.QuestHandler.giveRewards -> reward.type!=Reward.VALID_TYPE");
         }
     }
 
@@ -421,6 +427,16 @@ public class QuestHandler {
                     deleteQuestFile(file.getName(), plugin);
                 }
             }
+        }
+    }
+
+    public static void giveRewardTable(Table table,Player player){
+        if (!table.table_type.equals("reward"))return;
+
+        for (TableEntry entry:table.entries){
+            RewardEntry reward =(RewardEntry) entry;
+
+            QuestHandler.giveReward(player,reward);
         }
     }
 }

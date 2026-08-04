@@ -67,10 +67,10 @@ public class QuestLoader {
                             quest.expire = DateUtils.addDays(quest.created, expireDelay);
                             quest.id = questEntry.getKey();
                             // set all requirements quest id
+                            quest=plugin.tableLoader.handleQuestTables(quest);
                             for (Requirement requirement : quest.requirements){
                                 requirement.quest_id = quest.id;
                             }
-                            quest=plugin.tableLoader.handleQuestTables(quest,plugin);
                         }
                         allQuests.putAll(questFile.quests);
                         loaded += questFile.quests.size();

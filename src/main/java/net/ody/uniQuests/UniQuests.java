@@ -1,5 +1,6 @@
 package net.ody.uniQuests;
 
+import net.ody.uniQuests.commands.GiveRewardTableCommand;
 import net.ody.uniQuests.commands.QuestsCommand;
 import net.ody.uniQuests.commands.ReloadCommand;
 import net.ody.uniQuests.handlers.QuestHandler;
@@ -37,6 +38,7 @@ public final class UniQuests extends JavaPlugin {
         //register commands and listeners
         Objects.requireNonNull(getCommand("quests")).setExecutor(new QuestsCommand(this));
         Objects.requireNonNull(getCommand("questreload")).setExecutor(new ReloadCommand(this));
+        Objects.requireNonNull(getCommand("giveRewardTable")).setExecutor(new GiveRewardTableCommand(this));
 
         getServer().getPluginManager().registerEvents(new QuestsMenuListener(this), this);
         getServer().getPluginManager().registerEvents(new SeeQuestsMenuListener(this),this);
@@ -64,6 +66,7 @@ public final class UniQuests extends JavaPlugin {
         //enable hour check
         Bukkit.getScheduler().runTaskTimer(this,()->{
             logger.info("Quest check...");
+            quests = questLoader.loadAllQuests(this);
             QuestHandler.disableOutTime(this);
             QuestHandler.deleteOutTime(this);
             logger.info("Quest checked! see ya in an hour");

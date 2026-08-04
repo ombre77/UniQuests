@@ -9,7 +9,6 @@ import net.ody.uniQuests.menus.SeeQuestsMenu;
 import net.ody.uniQuests.modules.ActiveQuest;
 import net.ody.uniQuests.modules.PlayerData;
 import net.ody.uniQuests.modules.Quest;
-import net.ody.uniQuests.modules.QuestLoader;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -52,7 +51,7 @@ public class QuestDetailMenuListener implements Listener {
             data.addCompleted(quest, quest.type,plugin);
             plugin.questLoader.savePlayersData(plugin.playersData);
             player.sendMessage(Component.text("Quest validated, ggs!", NamedTextColor.GREEN));
-            QuestHandler.giveRewards(quest,player,plugin);
+            QuestHandler.giveRewards(quest,player);
             QuestDetailMenu.open(player, plugin, quest);
             return;
         }

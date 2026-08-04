@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 public class TableLoader {
     private static final Set<String> VALID_TABLE_TYPES = Set.of("reward", "price", "requirement");
@@ -115,7 +113,7 @@ public class TableLoader {
         return filtered.getFirst();
     }
 
-    public Quest handleQuestTables(Quest quest,UniQuests plugin){
+    public Quest handleQuestTables(Quest quest){
 
         //check requirement
         List<Requirement> resolvedRequirements = new ArrayList<>();
@@ -123,7 +121,7 @@ public class TableLoader {
             if (!requirement.type.equals("table")) {
                 resolvedRequirements.add(requirement);
                 continue;
-            };
+            }
 
             Table table=getTableById(requirement.table_id);
             if (table==null)continue;
@@ -137,10 +135,10 @@ public class TableLoader {
         //check price
         List<Price> resolvedPrices = new ArrayList<>();
         for (Price price: quest.price){
-            if (!price.type.equals("table")) {
+            if (price.type==null||!price.type.equals("table")) {
                 resolvedPrices.add(price);
                 continue;
-            };
+            }
 
             Table table=getTableById(price.table_id);
             if (table==null)continue;
@@ -157,7 +155,7 @@ public class TableLoader {
             if (!reward.type.equals("table")) {
                 resolvedRewards.add(reward);
                 continue;
-            };
+            }
 
             Table table=getTableById(reward.table_id);
             if (table==null)continue;
